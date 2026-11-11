@@ -271,10 +271,14 @@
 
 **نقطة فرض السياسة** (`src/middleware/auth.js`):
 
+</div>
+
 ```js
 app.use('/api/audit', authenticate, requirePasswordChanged, auditRoutes);
 router.get('/', requirePermission('audit:read'), handler);
 ```
+
+<div dir="rtl">
 
 - `authenticate`: يتحقق من التوقيع والانتهاء والجلسة وحالة الحساب، ثم **يحمّل الصلاحيات من القاعدة الآن** — فسحب دور يسري في الطلب التالي مباشرة (مُثبت باختبار آلي).
 - `requirePermission`: رفض افتراضي؛ أي صلاحية ناقصة ← `403` + تسجيل `access.denied` مع الصلاحية الناقصة.
@@ -415,11 +419,15 @@ router.get('/', requirePermission('audit:read'), handler);
 | قواعد العمل | مدير القسم لا يعتمد طلبه ولا طلبات قسم آخر؛ Maker–Checker وحد 10 ملايين في الفواتير؛ مُعِدّ الرواتب لا يعتمدها؛ موظف الخدمة لا يغلق التذاكر |
 | أمن الحقول | الراتب و IBAN محجوبان قراءةً وكتابةً بدون `salary:read`؛ الإعلانات الموجّهة لا تظهر لغير قسمها |
 
+</div>
+
 ```
 # tests 31
 # pass 31
 # fail 0
 ```
+
+<div dir="rtl">
 
 ### 12.2 الاختبار اليدوي للواجهات
 

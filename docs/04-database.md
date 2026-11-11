@@ -115,6 +115,8 @@
 
 **كيف يُطبَّق النطاق في SQL؟** الدالة `scopeWhere()` في `src/routes/apps/_helpers.js` تضيف الشرط إلى الاستعلام نفسه، فلا تُقرأ الصفوف غير المسموحة من القاعدة أصلاً:
 
+</div>
+
 ```sql
 -- leave:read:own
 ... WHERE l.user_id = ?            -- رقم المستخدم الحالي
@@ -123,6 +125,8 @@
 -- leave:read:all
 ... WHERE 1 = 1
 ```
+
+<div dir="rtl">
 
 ## لماذا لا تُخزّن الأسرار بشكل صريح؟
 
@@ -161,6 +165,8 @@
 
 ## استعلامات مفيدة للعرض أمام المشرف
 
+</div>
+
 ```sql
 -- الصلاحيات الفعلية لمستخدم
 SELECT DISTINCT p.name FROM permissions p
@@ -188,6 +194,8 @@ SELECT ip_address, COUNT(*) FROM audit_logs
 WHERE action LIKE 'auth.%' AND status = 'failure'
 GROUP BY ip_address ORDER BY 2 DESC LIMIT 5;
 ```
+
+<div dir="rtl">
 
 يمكن فتح الملف `data/iam.db` بأداة مجانية مثل **DB Browser for SQLite** لعرض الجداول.
 

@@ -17,6 +17,7 @@
 | 9 | [مخطط تدفق تسجيل الدخول](#04-login-flowchart) | مخطط تدفق (Flowchart) |
 | 10 | [مخطط التتابع: الدخول بخطوتين ثم التجديد ثم الخروج](#06-auth-sequence) | مخطط تتابع (Sequence) |
 | 11 | [دورة حياة تطوير النظام (SDLC)](#09-sdlc) | دورة حياة التطوير |
+| 12 | [مسار الطلب عبر الـ Middleware](#12-middleware-pipeline) | مخطط تدفق (Flowchart) |
 
 ---
 
@@ -38,7 +39,7 @@ flowchart TB
     direction LR
     P1["صفحات الدخول والتسجيل<br/>login · register · change-password"]
     P2["صفحات الإدارة<br/>dashboard · users · roles · audit · sessions"]
-    P3["مساحة الموظف<br/>resources · profile (MFA)"]
+    P3["وحدات الأعمال (12)<br/>home · leave · payroll · invoices<br/>deals · tickets · assets · profile …"]
     API["api.js<br/>Access Token في الذاكرة فقط<br/>+ Silent Refresh"]
     P1 --> API
     P2 --> API
@@ -57,7 +58,15 @@ flowchart TB
       R3["/api/roles<br/>RBAC Policy"]
       R4["/api/audit · /api/sessions<br/>/api/dashboard · /api/mfa"]
     end
-    PEP["نقطة فرض السياسة (PEP)<br/>authenticate ← requirePasswordChanged ← requirePermission"]
+    subgraph APPS["وحدات الأعمال routes/apps"]
+      direction LR
+      B1["/api/hr<br/>إعلانات · دليل · إجازات<br/>ملفات · رواتب"]
+      B2["/api/finance<br/>فواتير · مصروفات"]
+      B3["/api/ops<br/>عملاء · صفقات · تذاكر · أجهزة"]
+      B4["/api/portal<br/>الرئيسية"]
+      B5["_helpers.js<br/>النطاق · قواعد العمل · deny"]
+    end
+    PEP["نقطة فرض السياسة (PEP)<br/>authenticate ← requirePasswordChanged ← requirePermission / requireAny"]
     subgraph SVC["طبقة الخدمات"]
       direction LR
       S1["password.js<br/>bcrypt + Policy + History"]
@@ -69,14 +78,16 @@ flowchart TB
     end
     MW --> R1
     MW --> PEP --> ROUTES
+    PEP --> APPS
     R1 --> SVC
     ROUTES --> SVC
+    APPS --> SVC
   end
 
   SVC -- "Prepared Statements" --> DB
 
   subgraph DATA["طبقة البيانات — SQLite (node:sqlite)"]
-    DB[("iam.db<br/>users · roles · permissions<br/>sessions · audit_logs · resources")]
+    DB[("iam.db — 21 جدولاً<br/>الهوية · المصادقة · التفويض · التدقيق<br/>+ محتوى الأعمال: إجازات · رواتب · فواتير<br/>صفقات · تذاكر · أجهزة …")]
   end
 ```
 
@@ -638,6 +649,58 @@ flowchart LR
   E --> F["6. النشر والتشغيل<br/>npm start · متغيرات البيئة<br/>HTTPS خلف Reverse Proxy"]
   F --> G["7. الصيانة والمراقبة<br/>سجل التدقيق · لوحة المراقبة<br/>مراجعة الوصول الدورية"]
   G -. تغذية راجعة / تكرار .-> B
+```
+
+<div dir="rtl">
+
+</details>
+
+---
+
+<a id="12-middleware-pipeline"></a>
+
+## 12. مسار الطلب عبر الـ Middleware
+
+كيف يمر كل طلب API عبر 13 مرحلة بالترتيب: طبقة الحماية العامة في `app.js` (helmet، حد حجم JSON، Cookie، منع التخزين المؤقت، تحديد المعدل)، ثم نقطة فرض السياسة في `middleware/auth.js` (المصادقة، كلمة المرور المؤقتة، الصلاحية)، ثم معالج المسار (النطاق، قاعدة العمل، تصفية الحقول، التدقيق)، ثم معالج الأخطاء المركزي. كل فشل يتوقف عنده الطلب برمز محدد.
+
+![مسار الطلب عبر الـ Middleware](diagrams/12-middleware-pipeline.png)
+
+<details><summary>مصدر Mermaid</summary>
+
+</div>
+
+```mermaid
+flowchart TD
+  REQ([طلب HTTP من المتصفح<br/>GET /api/hr/leave?scope=department]) --> M1
+  subgraph G["طبقة الحماية العامة — تُطبَّق على كل الطلبات (src/app.js)"]
+    M1["1. helmet<br/>ترويسات الأمان: CSP · X-Frame · nosniff · Referrer-Policy"] --> M2["2. express.json({limit:'50kb'})<br/>قراءة الجسم ورفض الكبير"]
+    M2 --> M3["3. cookieParser<br/>قراءة iam_refresh"]
+    M3 --> M4["4. Cache-Control: no-store<br/>+ apiLimiter 600 طلب / 15 د"]
+    M4 --> M5{"5. هل المسار /api/auth/login<br/>أو register أو mfa/verify؟"}
+    M5 -- نعم --> M6["authLimiter<br/>30 طلب / 15 د لكل IP"]
+  end
+  M5 -- لا --> P1
+  M6 --> AUTH["موجّه المصادقة العام<br/>routes/auth.js"]
+  subgraph PEP["نقطة فرض السياسة — src/middleware/auth.js"]
+    P1["6. authenticate<br/>JWT ← الجلسة ← الحساب ← تحميل الأدوار والصلاحيات"] --> P2["7. requirePasswordChanged<br/>رفض إن كانت كلمة المرور مؤقتة"]
+    P2 --> P3["8. requirePermission / requireAny<br/>الرفض الافتراضي + تسجيل access.denied"]
+  end
+  P1 -. فشل .-> E401[401]
+  P2 -. فشل .-> E403a[403 PASSWORD_CHANGE_REQUIRED]
+  P3 -. فشل .-> E403b[403 FORBIDDEN]
+  P3 --> H
+  subgraph H["معالج المسار — src/routes/apps/*.js"]
+    H1["9. resolveScope + scopeWhere<br/>النطاق داخل SQL"] --> H2["10. قاعدة العمل على السجل<br/>leaveDecisionBlock · invoiceBlock …"]
+    H2 --> H3["11. تصفية الحقول + حساب _actions و _note لكل صف"]
+    H3 --> H4["12. audit.log<br/>تسجيل الحدث"]
+  end
+  H2 -. مخالفة .-> E403c["403 + السبب<br/>deny() يسجّل access.denied"]
+  H4 --> RES([استجابة JSON 200])
+  H -. استثناء غير متوقع .-> ERR["13. معالج الأخطاء المركزي<br/>500 برسالة عامة بلا Stack trace"]
+  classDef deny fill:#fbe7e5,stroke:#b4281f,color:#7c1a14
+  classDef ok fill:#e2f3ef,stroke:#0e7a6d,color:#0a5c52
+  class E401,E403a,E403b,E403c,ERR deny
+  class RES ok
 ```
 
 <div dir="rtl">

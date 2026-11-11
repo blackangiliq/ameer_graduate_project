@@ -3,7 +3,7 @@ flowchart TB
     direction LR
     P1["صفحات الدخول والتسجيل<br/>login · register · change-password"]
     P2["صفحات الإدارة<br/>dashboard · users · roles · audit · sessions"]
-    P3["مساحة الموظف<br/>resources · profile (MFA)"]
+    P3["وحدات الأعمال (12)<br/>home · leave · payroll · invoices<br/>deals · tickets · assets · profile …"]
     API["api.js<br/>Access Token في الذاكرة فقط<br/>+ Silent Refresh"]
     P1 --> API
     P2 --> API
@@ -22,7 +22,15 @@ flowchart TB
       R3["/api/roles<br/>RBAC Policy"]
       R4["/api/audit · /api/sessions<br/>/api/dashboard · /api/mfa"]
     end
-    PEP["نقطة فرض السياسة (PEP)<br/>authenticate ← requirePasswordChanged ← requirePermission"]
+    subgraph APPS["وحدات الأعمال routes/apps"]
+      direction LR
+      B1["/api/hr<br/>إعلانات · دليل · إجازات<br/>ملفات · رواتب"]
+      B2["/api/finance<br/>فواتير · مصروفات"]
+      B3["/api/ops<br/>عملاء · صفقات · تذاكر · أجهزة"]
+      B4["/api/portal<br/>الرئيسية"]
+      B5["_helpers.js<br/>النطاق · قواعد العمل · deny"]
+    end
+    PEP["نقطة فرض السياسة (PEP)<br/>authenticate ← requirePasswordChanged ← requirePermission / requireAny"]
     subgraph SVC["طبقة الخدمات"]
       direction LR
       S1["password.js<br/>bcrypt + Policy + History"]
@@ -34,12 +42,14 @@ flowchart TB
     end
     MW --> R1
     MW --> PEP --> ROUTES
+    PEP --> APPS
     R1 --> SVC
     ROUTES --> SVC
+    APPS --> SVC
   end
 
   SVC -- "Prepared Statements" --> DB
 
   subgraph DATA["طبقة البيانات — SQLite (node:sqlite)"]
-    DB[("iam.db<br/>users · roles · permissions<br/>sessions · audit_logs · resources")]
+    DB[("iam.db — 21 جدولاً<br/>الهوية · المصادقة · التفويض · التدقيق<br/>+ محتوى الأعمال: إجازات · رواتب · فواتير<br/>صفقات · تذاكر · أجهزة …")]
   end

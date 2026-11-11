@@ -37,15 +37,23 @@
 
 **مثال:**
 
+</div>
+
 ```http
 POST /api/auth/login
 Content-Type: application/json
 
 { "username": "ali.alsaadi", "password": "Rafidain@2026" }
 ```
+
+<div dir="rtl">
+</div>
+
 ```json
 { "mfaRequired": true, "challengeToken": "eyJhbGciOiJIUzI1NiIs..." }
 ```
+
+<div dir="rtl">
 
 ## المصادقة الثنائية — `/api/mfa` 🔒
 
@@ -106,6 +114,8 @@ Content-Type: application/json
 
 ## تجربة الـ API من الطرفية
 
+</div>
+
 ```bash
 # 1) دخول موظف
 TOKEN=$(curl -s -c jar.txt -H 'Content-Type: application/json' \
@@ -121,6 +131,8 @@ curl -s -H "Authorization: Bearer $TOKEN" http://localhost:3000/api/audit
 # 4) تجديد الرمز بالـ Cookie
 curl -s -b jar.txt -c jar.txt -X POST http://localhost:3000/api/auth/refresh
 ```
+
+<div dir="rtl">
 
 ## وحدات الأعمال
 
@@ -173,14 +185,22 @@ curl -s -b jar.txt -c jar.txt -X POST http://localhost:3000/api/auth/refresh
 
 **مثال رفض بسبب قاعدة عمل:**
 
+</div>
+
 ```http
 POST /api/finance/invoices/35/decision        (المحاسب haider.altamimi)
 { "decision": "approve" }
 ```
+
+<div dir="rtl">
+</div>
+
 ```json
 HTTP/1.1 403 Forbidden
 { "error": "المبلغ يتجاوز حد اعتمادك (10,000,000 د.ع) — يتطلب المدير المالي",
   "code": "FORBIDDEN", "required": ["invoices:approve_unlimited"] }
 ```
+
+<div dir="rtl">
 
 </div>

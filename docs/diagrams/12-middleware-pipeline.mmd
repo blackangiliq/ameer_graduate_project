@@ -1,0 +1,31 @@
+flowchart TD
+  REQ([طلب HTTP من المتصفح<br/>GET /api/hr/leave?scope=department]) --> M1
+  subgraph G["طبقة الحماية العامة — تُطبَّق على كل الطلبات (src/app.js)"]
+    M1["1. helmet<br/>ترويسات الأمان: CSP · X-Frame · nosniff · Referrer-Policy"] --> M2["2. express.json({limit:'50kb'})<br/>قراءة الجسم ورفض الكبير"]
+    M2 --> M3["3. cookieParser<br/>قراءة iam_refresh"]
+    M3 --> M4["4. Cache-Control: no-store<br/>+ apiLimiter 600 طلب / 15 د"]
+    M4 --> M5{"5. هل المسار /api/auth/login<br/>أو register أو mfa/verify؟"}
+    M5 -- نعم --> M6["authLimiter<br/>30 طلب / 15 د لكل IP"]
+  end
+  M5 -- لا --> P1
+  M6 --> AUTH["موجّه المصادقة العام<br/>routes/auth.js"]
+  subgraph PEP["نقطة فرض السياسة — src/middleware/auth.js"]
+    P1["6. authenticate<br/>JWT ← الجلسة ← الحساب ← تحميل الأدوار والصلاحيات"] --> P2["7. requirePasswordChanged<br/>رفض إن كانت كلمة المرور مؤقتة"]
+    P2 --> P3["8. requirePermission / requireAny<br/>الرفض الافتراضي + تسجيل access.denied"]
+  end
+  P1 -. فشل .-> E401[401]
+  P2 -. فشل .-> E403a[403 PASSWORD_CHANGE_REQUIRED]
+  P3 -. فشل .-> E403b[403 FORBIDDEN]
+  P3 --> H
+  subgraph H["معالج المسار — src/routes/apps/*.js"]
+    H1["9. resolveScope + scopeWhere<br/>النطاق داخل SQL"] --> H2["10. قاعدة العمل على السجل<br/>leaveDecisionBlock · invoiceBlock …"]
+    H2 --> H3["11. تصفية الحقول + حساب _actions و _note لكل صف"]
+    H3 --> H4["12. audit.log<br/>تسجيل الحدث"]
+  end
+  H2 -. مخالفة .-> E403c["403 + السبب<br/>deny() يسجّل access.denied"]
+  H4 --> RES([استجابة JSON 200])
+  H -. استثناء غير متوقع .-> ERR["13. معالج الأخطاء المركزي<br/>500 برسالة عامة بلا Stack trace"]
+  classDef deny fill:#fbe7e5,stroke:#b4281f,color:#7c1a14
+  classDef ok fill:#e2f3ef,stroke:#0e7a6d,color:#0a5c52
+  class E401,E403a,E403b,E403c,ERR deny
+  class RES ok
