@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>لوحة المراقبة · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="dashboard" data-permission="dashboard:view">
+<main class="main" id="main" hidden>
+  <div class="page-head">
+    <div><div class="crumb">المراقبة</div><h1>لوحة المراقبة الأمنية</h1><p>صورة لحظية عن الهويات والجلسات ومحاولات الدخول خلال آخر 24 ساعة.</p></div>
+    <div class="actions" id="headActions"></div>
+  </div>
+  <div class="grid g-4" id="stats"></div>
+  <div class="grid g-main" style="margin-top:16px">
+    <div class="card"><div class="card-head"><h3>محاولات تسجيل الدخول — آخر 14 يوماً</h3><div class="legend"><span><i style="background:var(--accent)"></i>ناجحة</span><span><i style="background:var(--danger)"></i>فاشلة</span></div></div><div class="card-body"><div class="bars" id="chart"></div><div class="bars-x" id="chartX"></div></div></div>
+    <div class="card"><div class="card-head"><h3>توزيع الأدوار</h3></div><div class="card-body" id="roles"></div></div>
+  </div>
+  <div class="grid g-main" style="margin-top:16px">
+    <div class="card"><div class="card-head"><h3>أحداث تتطلب الانتباه</h3><a href="/audit" class="btn btn-ghost btn-sm">سجل التدقيق الكامل</a></div><div class="table-wrap"><table><thead><tr><th>الوقت</th><th>المستخدم</th><th>الحدث</th><th>النتيجة</th><th>العنوان</th></tr></thead><tbody id="recent"></tbody></table></div></div>
+    <div class="card"><div class="card-head"><h3>عناوين IP بأكثر محاولات فاشلة (7 أيام)</h3></div><div class="card-body" id="ips"></div></div>
+  </div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

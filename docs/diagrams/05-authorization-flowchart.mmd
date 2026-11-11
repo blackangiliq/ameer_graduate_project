@@ -1,0 +1,25 @@
+flowchart TD
+  A([طلب API محمي<br/>مثال: GET /api/audit]) --> B{يوجد Bearer Token؟}
+  B -- لا --> X1[401 NO_TOKEN]
+  B -- نعم --> C{توقيع JWT صحيح<br/>HS256 + issuer؟}
+  C -- لا --> X2[401 INVALID_TOKEN]
+  C -- نعم --> D{انتهت صلاحيته؟<br/>exp}
+  D -- نعم --> X3[401 TOKEN_EXPIRED<br/>الواجهة تطلب /refresh تلقائياً]
+  D -- لا --> E{الجلسة sid موجودة<br/>وغير ملغاة؟}
+  E -- لا --> X4[401 SESSION_REVOKED]
+  E -- نعم --> F{الحساب active؟}
+  F -- لا --> X5[401 ACCOUNT_INACTIVE]
+  F -- نعم --> G[تحميل الأدوار والصلاحيات<br/>من قاعدة البيانات الآن]
+  G --> H{كلمة مرور مؤقتة؟}
+  H -- نعم --> X6[403 PASSWORD_CHANGE_REQUIRED]
+  H -- لا --> I{"الصلاحية المطلوبة<br/>audit:read ∈ صلاحيات المستخدم؟"}
+  I -- لا --> X7[403 FORBIDDEN<br/>+ تسجيل access.denied]
+  I -- نعم --> J{قواعد إضافية؟<br/>تعديل الذات / المدير العام}
+  J -- مخالفة --> X8[403 منع تصعيد الصلاحيات]
+  J -- سليم --> K[تنفيذ العملية<br/>+ تسجيل الحدث في audit_logs]
+  K --> L([200 OK])
+
+  classDef deny fill:#fbe7e5,stroke:#b4281f,color:#7c1a14
+  classDef ok fill:#e2f3ef,stroke:#0e7a6d,color:#0a5c52
+  class X1,X2,X3,X4,X5,X6,X7,X8 deny
+  class L,K ok

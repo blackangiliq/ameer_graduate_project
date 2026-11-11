@@ -1,0 +1,65 @@
+erDiagram
+  DEPARTMENTS ||--o{ USERS : "يضم"
+  USERS ||--o{ USER_ROLES : "يملك"
+  ROLES ||--o{ USER_ROLES : "يُسند إلى"
+  ROLES ||--o{ ROLE_PERMISSIONS : "يحتوي"
+  PERMISSIONS ||--o{ ROLE_PERMISSIONS : "تُمنح عبر"
+  USERS ||--o{ SESSIONS : "يفتح"
+  USERS ||--o{ PASSWORD_HISTORY : "له"
+  USERS ||--o{ MFA_RECOVERY_CODES : "له"
+  USERS ||--o{ AUDIT_LOGS : "ينفّذ"
+
+  DEPARTMENTS { int id PK
+    text name
+    text code }
+  USERS { int id PK
+    text username UK
+    text email UK
+    text full_name
+    int department_id FK
+    text password_hash "bcrypt"
+    text status "pending|active|suspended|disabled"
+    int must_change_password
+    int failed_attempts
+    text locked_until
+    int mfa_enabled
+    text mfa_secret_enc "AES-256-GCM"
+    text last_login_at }
+  ROLES { int id PK
+    text name UK
+    text label
+    int is_system }
+  PERMISSIONS { int id PK
+    text name UK "resource:action"
+    text category }
+  USER_ROLES { int user_id PK,FK
+    int role_id PK,FK
+    int assigned_by FK }
+  ROLE_PERMISSIONS { int role_id PK,FK
+    int permission_id PK,FK }
+  SESSIONS { text id PK "UUID = JWT sid"
+    int user_id FK
+    text refresh_token_hash "SHA-256"
+    text ip_address
+    int mfa_verified
+    text expires_at
+    text revoked_at }
+  PASSWORD_HISTORY { int id PK
+    int user_id FK
+    text password_hash }
+  MFA_RECOVERY_CODES { int id PK
+    int user_id FK
+    text code_hash "SHA-256"
+    text used_at }
+  AUDIT_LOGS { int id PK
+    text created_at
+    int actor_id FK
+    text action
+    text target_type
+    text status "success|failure|denied"
+    text ip_address
+    text details "JSON" }
+  RESOURCES { int id PK
+    text category "public|hr|finance|it"
+    text title
+    text classification }

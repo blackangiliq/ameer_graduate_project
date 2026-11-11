@@ -1,0 +1,45 @@
+flowchart TB
+  subgraph CLIENT["طبقة العرض — المتصفح (HTML + CSS + JavaScript)"]
+    direction LR
+    P1["صفحات الدخول والتسجيل<br/>login · register · change-password"]
+    P2["صفحات الإدارة<br/>dashboard · users · roles · audit · sessions"]
+    P3["مساحة الموظف<br/>resources · profile (MFA)"]
+    API["api.js<br/>Access Token في الذاكرة فقط<br/>+ Silent Refresh"]
+    P1 --> API
+    P2 --> API
+    P3 --> API
+  end
+
+  API -- "HTTPS · JSON<br/>Authorization: Bearer JWT<br/>Cookie: iam_refresh (HttpOnly)" --> MW
+
+  subgraph SERVER["طبقة التطبيق — Node.js + Express 5"]
+    direction TB
+    MW["طبقة الحماية العامة<br/>Helmet (CSP, HSTS, X-Frame) · Rate Limit · JSON size limit · Cookie Parser"]
+    subgraph ROUTES["الموجّهات REST API"]
+      direction LR
+      R1["/api/auth<br/>login · mfa · refresh · logout"]
+      R2["/api/users<br/>Joiner · Mover · Leaver"]
+      R3["/api/roles<br/>RBAC Policy"]
+      R4["/api/audit · /api/sessions<br/>/api/dashboard · /api/mfa"]
+    end
+    PEP["نقطة فرض السياسة (PEP)<br/>authenticate ← requirePasswordChanged ← requirePermission"]
+    subgraph SVC["طبقة الخدمات"]
+      direction LR
+      S1["password.js<br/>bcrypt + Policy + History"]
+      S2["tokens.js<br/>JWT + Refresh Rotation"]
+      S3["totp.js<br/>RFC 6238"]
+      S4["rbac.js<br/>User→Role→Permission"]
+      S5["crypto.js<br/>AES-256-GCM · SHA-256"]
+      S6["audit.js<br/>سجل التدقيق"]
+    end
+    MW --> R1
+    MW --> PEP --> ROUTES
+    R1 --> SVC
+    ROUTES --> SVC
+  end
+
+  SVC -- "Prepared Statements" --> DB
+
+  subgraph DATA["طبقة البيانات — SQLite (node:sqlite)"]
+    DB[("iam.db<br/>users · roles · permissions<br/>sessions · audit_logs · resources")]
+  end

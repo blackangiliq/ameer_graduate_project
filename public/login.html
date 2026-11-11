@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تسجيل الدخول · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="auth">
+  <section class="auth-panel">
+    <div class="auth-brand"><img class="logo" src="/img/logo.svg" alt="">IAM Gateway</div>
+
+    <div id="step1">
+      <h1>تسجيل الدخول</h1>
+      <p class="sub">الخطوة 1 من 2 — شيء تعرفه (كلمة المرور)</p>
+      <div class="step-indicator"><span class="on"></span><span></span></div>
+      <form id="loginForm" novalidate>
+        <div id="loginAlert" hidden></div>
+        <div class="field">
+          <label for="username">اسم المستخدم أو البريد الإلكتروني</label>
+          <input id="username" name="username" type="text" class="ltr" autocomplete="username" required autofocus>
+        </div>
+        <div class="field">
+          <label for="password">كلمة المرور</label>
+          <input id="password" name="password" type="password" class="ltr" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn-accent btn-block" type="submit">متابعة</button>
+      </form>
+      <p class="muted" style="margin-top:16px">موظف جديد؟ <a href="/register">طلب إنشاء حساب</a></p>
+      <div class="demo-box">حسابات تجريبية — كلمة المرور لجميعها: <b class="mono">Rafidain@2026</b><br>
+        <span class="mono">ali.alsaadi</span> مدير عام (MFA) · <span class="mono">zainab.alobaidi</span> مسؤولة هويات (MFA) · <span class="mono">mustafa.aljubouri</span> مدقق · <span class="mono">omar.alani</span> موظف</div>
+    </div>
+
+    <div id="step2" hidden>
+      <h1>التحقق بخطوتين</h1>
+      <p class="sub">الخطوة 2 من 2 — شيء تملكه (تطبيق المصادقة في هاتفك)</p>
+      <div class="step-indicator"><span class="on"></span><span class="on"></span></div>
+      <form id="mfaForm" novalidate>
+        <div id="mfaAlert" hidden></div>
+        <div class="field" id="totpField">
+          <label for="code">أدخل الرمز المكوّن من 6 أرقام</label>
+          <input id="code" name="code" class="code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="\d{6}">
+        </div>
+        <div class="field" id="recoveryField" hidden>
+          <label for="recovery">رمز الاسترداد</label>
+          <input id="recovery" name="recovery" type="text" class="ltr" placeholder="XXXXX-XXXXX">
+        </div>
+        <button class="btn btn-accent btn-block" type="submit">تحقّق ودخول</button>
+      </form>
+      <p class="muted" style="margin-top:14px"><a href="#" id="toggleRecovery">فقدت هاتفك؟ استخدم رمز استرداد</a> · <a href="/login">رجوع</a></p>
+      <p class="muted" style="font-size:12.5px">الرمز يتغيّر كل 30 ثانية. صلاحية هذه الخطوة 5 دقائق.</p>
+    </div>
+
+    <div class="auth-foot">© 2026 شركة الرافدين للحلول التقنية — مشروع تخرج: نظام إدارة الهوية والوصول</div>
+  </section>
+  <aside class="auth-side">
+    <h2>بوابة موحّدة لإدارة الهوية والوصول</h2>
+    <p class="lead">كل طلب يمرّ بثلاث طبقات تحقّق قبل الوصول إلى أي مورد من موارد المؤسسة، ويُسجَّل في سجل تدقيق غير قابل للتعديل من الواجهة.</p>
+    <div class="layers">
+      <div class="layer"><div class="num">01</div><div><b>التعريف والمصادقة</b><span>كلمة مرور مشفرة بـ bcrypt + رمز TOTP من تطبيق المصادقة</span></div></div>
+      <div class="layer"><div class="num">02</div><div><b>التفويض حسب الدور (RBAC)</b><span>مبدأ أقل الصلاحيات: المستخدم ← الدور ← الصلاحية</span></div></div>
+      <div class="layer"><div class="num">03</div><div><b>المساءلة والتدقيق</b><span>تسجيل كل دخول ورفض وتغيير مع العنوان والوقت</span></div></div>
+    </div>
+  </aside>
+</div>
+<script src="/js/api.js"></script>
+<script src="/js/login.js"></script>
+</body>
+</html>

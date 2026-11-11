@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>حسابي · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="profile" data-permission="">
+<main class="main" id="main" hidden>
+  <div class="page-head">
+    <div><div class="crumb">مساحة العمل</div><h1>حسابي والأمان</h1><p>بيانات الهوية، الصلاحيات الفعلية، كلمة المرور، والمصادقة الثنائية.</p></div>
+    <div class="actions" id="headActions"></div>
+  </div>
+  <div class="grid g-2">
+    <div class="card"><div class="card-head"><h3>الهوية</h3></div><div class="card-body"><dl class="kv" id="identity"></dl></div></div>
+    <div class="card"><div class="card-head"><h3>الأدوار والصلاحيات الفعلية</h3></div><div class="card-body" id="access"></div></div>
+  </div>
+  <div class="grid g-2" style="margin-top:16px">
+    <div class="card"><div class="card-head"><h3>المصادقة الثنائية (TOTP)</h3><span id="mfaBadge"></span></div><div class="card-body" id="mfa"></div></div>
+    <div class="card"><div class="card-head"><h3>تغيير كلمة المرور</h3></div><div class="card-body">
+      <form id="pwdForm" novalidate>
+        <div id="pwdAlert" hidden></div>
+        <div class="field"><label for="current">كلمة المرور الحالية</label><input id="current" type="password" class="ltr" autocomplete="current-password"></div>
+        <div class="field"><label for="password">كلمة المرور الجديدة</label><input id="password" type="password" class="ltr" autocomplete="new-password"><ul class="policy" id="policy"></ul></div>
+        <div class="field"><label for="confirm">تأكيد كلمة المرور</label><input id="confirm" type="password" class="ltr" autocomplete="new-password"></div>
+        <button class="btn btn-accent" type="submit">تغيير كلمة المرور</button>
+        <p class="muted" style="font-size:12.5px;margin-bottom:0">بعد التغيير يتم إنهاء جلساتك على كل الأجهزة الأخرى. لا يمكن إعادة استخدام آخر 5 كلمات مرور.</p>
+      </form></div></div>
+  </div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/profile.js"></script>
+</body>
+</html>

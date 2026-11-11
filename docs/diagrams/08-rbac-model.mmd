@@ -1,0 +1,41 @@
+flowchart LR
+  subgraph U["المستخدمون (Identities)"]
+    u1["علي الساعدي<br/>CISO"]
+    u2["زينب العبيدي<br/>مسؤولة هويات"]
+    u3["مصطفى الجبوري<br/>مدقق"]
+    u4["سارة الموسوي<br/>دعم فني"]
+    u5["حسين الخفاجي<br/>مالية"]
+    u6["عمر العاني<br/>مبيعات"]
+  end
+  subgraph R["الأدوار (Roles)"]
+    r1[super_admin]
+    r2[iam_admin]
+    r3[security_auditor]
+    r4[it_support]
+    r5[finance_officer]
+    r6[employee]
+  end
+  subgraph P["الصلاحيات (resource:action)"]
+    p1["roles:manage"]
+    p2["users:create / update / disable"]
+    p3["roles:assign"]
+    p4["audit:read · audit:export"]
+    p5["users:unlock · users:reset_password"]
+    p6["resources:it:read"]
+    p7["resources:finance:read"]
+    p8["resources:public:read"]
+  end
+  u1 --> r1
+  u2 --> r2
+  u3 --> r3
+  u4 --> r4
+  u5 --> r5
+  u6 --> r6
+  u1 & u2 & u3 & u4 & u5 --> r6
+  r1 -. كل الصلاحيات .-> p1
+  r2 --> p2 & p3 & p5
+  r2 --> p4
+  r3 --> p4
+  r4 --> p5 & p6
+  r5 --> p7
+  r6 --> p8

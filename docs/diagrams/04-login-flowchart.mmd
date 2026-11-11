@@ -1,0 +1,26 @@
+flowchart TD
+  A([بداية: المستخدم يفتح /login]) --> B[/إدخال اسم المستخدم وكلمة المرور/]
+  B --> RL{تجاوز حد الطلبات<br/>30 طلب / 15 دقيقة لكل IP؟}
+  RL -- نعم --> RLX[429 Too Many Requests]
+  RL -- لا --> C{هل المستخدم موجود؟}
+  C -- لا --> C1[مقارنة bcrypt وهمية<br/>لتوحيد زمن الاستجابة] --> F1
+  C -- نعم --> D{هل الحساب مقفل؟<br/>locked_until > الآن}
+  D -- نعم --> D1[423 Locked<br/>+ تسجيل auth.login denied]
+  D -- لا --> E{bcrypt.compare<br/>كلمة المرور صحيحة؟}
+  E -- لا --> E1[زيادة failed_attempts]
+  E1 --> E2{المحاولات = 5 ؟}
+  E2 -- نعم --> E3[قفل الحساب 15 دقيقة<br/>auth.account_locked] --> F1
+  E2 -- لا --> F1[401 رسالة عامة موحدة<br/>+ تسجيل auth.login failure]
+  E -- نعم --> G{حالة الحساب active؟}
+  G -- "pending / suspended / disabled" --> G1[403 مع سبب الحالة<br/>+ تسجيل denied]
+  G -- نعم --> H{MFA مفعّلة؟}
+  H -- نعم --> I[إصدار challengeToken<br/>صالح 5 دقائق فقط]
+  I --> J[/إدخال رمز TOTP أو رمز استرداد/]
+  J --> K{الرمز صحيح؟<br/>نافذة ±30 ثانية}
+  K -- لا --> K1[401 + احتساب محاولة فاشلة] --> J
+  K -- نعم --> L
+  H -- لا --> L[تصفير العداد · إنشاء جلسة في sessions<br/>Access JWT 15 دقيقة + Refresh Cookie 7 أيام]
+  L --> M[تسجيل auth.login success]
+  M --> N{must_change_password؟}
+  N -- نعم --> N1[تحويل إلى /change-password]
+  N -- لا --> O([الدخول إلى النظام])

@@ -1,0 +1,15 @@
+stateDiagram-v2
+  direction LR
+  [*] --> Issued : تسجيل دخول ناجح
+  state "Refresh Token صالح<br/>(hash مخزّن)" as Issued
+  state "مستبدَل (قديم)<br/>Rotated" as Rotated
+  state "الجلسة ملغاة<br/>revoked_at" as Revoked
+  state "منتهي<br/>expires_at" as Expired
+
+  Issued --> Issued : POST /refresh<br/>إصدار رمز جديد
+  Issued --> Rotated : الرمز القديم بعد التدوير
+  Rotated --> Revoked : إعادة استخدامه = سرقة<br/>auth.refresh_token_reuse
+  Issued --> Revoked : تسجيل خروج · إنهاء من المسؤول<br/>تغيير كلمة المرور · تعطيل الحساب
+  Issued --> Expired : مرور 7 أيام
+  Revoked --> [*]
+  Expired --> [*]

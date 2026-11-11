@@ -1,0 +1,21 @@
+stateDiagram-v2
+  direction LR
+  [*] --> Pending : تسجيل ذاتي<br/>register
+  [*] --> Active_TempPwd : إنشاء من المسؤول (Joiner)<br/>كلمة مرور مؤقتة
+  Pending --> Active : موافقة مسؤول الهويات<br/>user.approve
+  Active_TempPwd --> Active : أول دخول + تغيير كلمة المرور
+  Active --> Locked : 5 محاولات فاشلة
+  Locked --> Active : مرور 15 دقيقة<br/>أو فك القفل (IT)
+  Active --> Active : تغيير الدور (Mover)<br/>يسري فوراً
+  Active --> Suspended : تعليق مؤقت<br/>+ إنهاء الجلسات
+  Suspended --> Active : إعادة التفعيل
+  Active --> Disabled : إيقاف نهائي (Leaver)<br/>+ إنهاء الجلسات
+  Suspended --> Disabled : إيقاف نهائي
+  Disabled --> [*]
+
+  state "بانتظار الموافقة<br/>pending" as Pending
+  state "نشط + كلمة مرور مؤقتة<br/>must_change_password" as Active_TempPwd
+  state "نشط<br/>active" as Active
+  state "مقفل مؤقتاً<br/>locked_until" as Locked
+  state "معلّق<br/>suspended" as Suspended
+  state "معطّل<br/>disabled" as Disabled

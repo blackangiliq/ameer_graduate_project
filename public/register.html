@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>طلب حساب جديد · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="auth">
+  <section class="auth-panel">
+    <div class="auth-brand"><img class="logo" src="/img/logo.svg" alt="">IAM Gateway</div>
+    <h1 style="margin-top:30px">طلب إنشاء حساب</h1>
+    <p class="sub">يُنشأ الحساب بحالة «بانتظار الموافقة» وبدور «موظف» فقط، ولا يمكن الدخول به حتى يوافق مسؤول الهويات.</p>
+    <form id="registerForm" novalidate style="margin-top:20px">
+      <div id="regAlert" hidden></div>
+      <div class="field"><label for="fullName">الاسم الكامل</label><input id="fullName" type="text" required></div>
+      <div class="grid g-2" style="gap:12px">
+        <div class="field"><label for="username">اسم المستخدم</label><input id="username" type="text" class="ltr" placeholder="firstname.lastname" autocomplete="username"></div>
+        <div class="field"><label for="department">القسم</label><select id="department"></select></div>
+      </div>
+      <div class="field"><label for="email">البريد الإلكتروني للعمل</label><input id="email" type="email" class="ltr" placeholder="name@alrafidain-tech.iq"></div>
+      <div class="field">
+        <label for="password">كلمة المرور</label>
+        <input id="password" type="password" class="ltr" autocomplete="new-password">
+        <ul class="policy" id="policy"></ul>
+      </div>
+      <div class="field"><label for="confirm">تأكيد كلمة المرور</label><input id="confirm" type="password" class="ltr" autocomplete="new-password"></div>
+      <button class="btn btn-accent btn-block" type="submit">إرسال الطلب</button>
+    </form>
+    <p class="muted" style="margin-top:14px">لديك حساب؟ <a href="/login">تسجيل الدخول</a></p>
+  </section>
+  <aside class="auth-side">
+    <h2>بوابة موحّدة لإدارة الهوية والوصول</h2>
+    <p class="lead">كل طلب يمرّ بثلاث طبقات تحقّق قبل الوصول إلى أي مورد من موارد المؤسسة، ويُسجَّل في سجل تدقيق غير قابل للتعديل من الواجهة.</p>
+    <div class="layers">
+      <div class="layer"><div class="num">01</div><div><b>التعريف والمصادقة</b><span>كلمة مرور مشفرة بـ bcrypt + رمز TOTP من تطبيق المصادقة</span></div></div>
+      <div class="layer"><div class="num">02</div><div><b>التفويض حسب الدور (RBAC)</b><span>مبدأ أقل الصلاحيات: المستخدم ← الدور ← الصلاحية</span></div></div>
+      <div class="layer"><div class="num">03</div><div><b>المساءلة والتدقيق</b><span>تسجيل كل دخول ورفض وتغيير مع العنوان والوقت</span></div></div>
+    </div>
+  </aside>
+</div>
+<script src="/js/api.js"></script>
+<script src="/js/register.js"></script>
+</body>
+</html>

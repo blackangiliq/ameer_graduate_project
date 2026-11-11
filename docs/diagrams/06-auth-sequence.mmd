@@ -1,0 +1,40 @@
+sequenceDiagram
+  autonumber
+  actor U as المستخدم
+  participant B as المتصفح (api.js)
+  participant S as خادم Express
+  participant DB as SQLite
+
+  U->>B: اسم المستخدم + كلمة المرور
+  B->>S: POST /api/auth/login
+  S->>DB: SELECT user (Prepared Statement)
+  S->>S: bcrypt.compare(password, hash)
+  S-->>B: { mfaRequired: true, challengeToken }
+  U->>B: رمز TOTP من الهاتف
+  B->>S: POST /api/auth/mfa/verify
+  S->>DB: قراءة mfa_secret_enc
+  S->>S: فك تشفير AES-256-GCM ثم HMAC-SHA1 (RFC 6238)
+  S->>DB: INSERT sessions (refresh_token_hash = SHA-256)
+  S->>DB: INSERT audit_logs (auth.login)
+  S-->>B: accessToken (JWT 15m) + Set-Cookie iam_refresh (HttpOnly, SameSite=Strict)
+
+  Note over B: الـ Access Token يُحفظ في متغير بالذاكرة فقط
+
+  B->>S: GET /api/users  [Authorization: Bearer JWT]
+  S->>S: التحقق من التوقيع والصلاحية الزمنية
+  S->>DB: الجلسة فعّالة؟ + الأدوار والصلاحيات
+  S-->>B: 200 بيانات المستخدمين
+
+  Note over B,S: بعد 15 دقيقة ينتهي الـ JWT
+  B->>S: GET /api/users
+  S-->>B: 401 TOKEN_EXPIRED
+  B->>S: POST /api/auth/refresh (Cookie تلقائياً)
+  S->>DB: مقارنة SHA-256 للرمز ثم استبداله برمز جديد (Rotation)
+  S-->>B: accessToken جديد + Cookie جديد
+  B->>S: إعادة الطلب الأصلي
+  S-->>B: 200
+
+  U->>B: تسجيل الخروج
+  B->>S: POST /api/auth/logout
+  S->>DB: UPDATE sessions SET revoked_at
+  S-->>B: حذف الـ Cookie

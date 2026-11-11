@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>سجل التدقيق · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="audit" data-permission="audit:read">
+<main class="main" id="main" hidden>
+  <div class="page-head">
+    <div><div class="crumb">إدارة الهوية والوصول</div><h1>سجل التدقيق</h1><p>من فعل ماذا، ومتى، ومن أين، وبأي نتيجة.</p></div>
+    <div class="actions" id="headActions"></div>
+  </div>
+  <div class="card">
+    <div class="toolbar">
+      <input type="search" id="q" placeholder="بحث: مستخدم، عنوان IP، تفاصيل">
+      <select id="fAction"><option value="">كل الأحداث</option><option value="auth.">المصادقة auth.*</option><option value="auth.login">تسجيل الدخول</option><option value="auth.mfa">المصادقة الثنائية</option><option value="access.denied">رفض الوصول</option><option value="user.">إدارة المستخدمين user.*</option><option value="role.">الأدوار role.*</option><option value="session.">الجلسات</option><option value="mfa.">إعداد MFA</option></select>
+      <select id="fStatus"><option value="">كل النتائج</option><option value="success">نجاح</option><option value="failure">فشل</option><option value="denied">مرفوض</option></select>
+      <input type="date" id="from" title="من"><input type="date" id="to" title="إلى">
+      <span class="spacer"></span>
+      <button class="btn btn-ghost btn-sm" id="exportBtn" hidden>تصدير CSV</button>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>الوقت (بغداد)</th><th>المستخدم</th><th>الحدث</th><th>الهدف</th><th>النتيجة</th><th>العنوان والجهاز</th><th>التفاصيل</th></tr></thead><tbody id="rows"></tbody></table></div>
+    <div class="pager"><span id="pageInfo"></span><div class="actions"><button class="btn btn-ghost btn-sm" id="prev">السابق</button><button class="btn btn-ghost btn-sm" id="next">التالي</button></div></div>
+  </div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/audit.js"></script>
+</body>
+</html>

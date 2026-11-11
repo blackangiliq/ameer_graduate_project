@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الجلسات · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="sessions" data-permission="">
+<main class="main" id="main" hidden>
+  <div class="page-head">
+    <div><div class="crumb">إدارة الهوية والوصول</div><h1>الجلسات النشطة</h1><p>كل جلسة = رمز تحديث مخزّن كبصمة SHA-256. إنهاء الجلسة يوقف الوصول فوراً حتى لو كان رمز الوصول لم ينتهِ بعد.</p></div>
+    <div class="actions" id="headActions"></div>
+  </div>
+  <div class="card"><div class="card-head"><h3>أجهزتي</h3></div><div class="table-wrap"><table><thead><tr><th>الجهاز</th><th>عنوان IP</th><th>MFA</th><th>بدأت</th><th>آخر نشاط</th><th>تنتهي</th><th></th></tr></thead><tbody id="mine"></tbody></table></div></div>
+  <div class="card" style="margin-top:16px" id="allCard" hidden><div class="card-head"><h3>جميع الجلسات النشطة في المؤسسة</h3><span class="muted" id="allCount"></span></div><div class="table-wrap"><table><thead><tr><th>المستخدم</th><th>الجهاز</th><th>عنوان IP</th><th>MFA</th><th>بدأت</th><th>آخر نشاط</th><th></th></tr></thead><tbody id="all"></tbody></table></div></div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/sessions.js"></script>
+</body>
+</html>
