@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الإجازات · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="leave" data-permission="leave:create,leave:read:own,leave:read:department,leave:read:all" data-probe="/api/hr/leave">
+<main class="main" id="main" hidden>
+  <div class="page-head">
+    <div><div class="crumb">الموارد البشرية</div><h1>الإجازات</h1><p>الموظف يرى طلباته، مدير القسم يرى ويعتمد طلبات قسمه، والموارد البشرية ترى الجميع. لا أحد يعتمد طلبه بنفسه.</p></div>
+    <div class="actions" id="headActions"></div>
+  </div>
+  <div id="perms"></div>
+  <div class="kpis" id="balance"></div>
+  <div class="card"><div class="toolbar"><div id="scope"></div><span class="spacer"></span><select id="status"><option value="">كل الحالات</option><option value="pending">قيد الانتظار</option><option value="approved">معتمدة</option><option value="rejected">مرفوضة</option><option value="cancelled">ملغاة</option></select></div><div class="table-wrap" id="table"></div></div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/module.js"></script>
+<script src="/js/leave.js"></script>
+</body>
+</html>

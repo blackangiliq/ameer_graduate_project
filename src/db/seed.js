@@ -22,24 +22,73 @@ const DEPARTMENTS = [
 ];
 
 const PERMISSIONS = [
-  ['dashboard:view', 'عرض لوحة المراقبة الأمنية', 'لوحة المراقبة'],
-  ['users:read', 'عرض المستخدمين', 'إدارة الهويات'],
-  ['users:create', 'إنشاء مستخدم', 'إدارة الهويات'],
-  ['users:update', 'تعديل بيانات مستخدم', 'إدارة الهويات'],
-  ['users:disable', 'تفعيل / تعليق / تعطيل حساب', 'إدارة الهويات'],
-  ['users:reset_password', 'إعادة تعيين كلمة المرور والمصادقة الثنائية', 'إدارة الهويات'],
-  ['users:unlock', 'فك قفل الحساب', 'إدارة الهويات'],
-  ['roles:read', 'عرض الأدوار والصلاحيات', 'الأدوار والصلاحيات'],
-  ['roles:assign', 'إسناد الأدوار للمستخدمين', 'الأدوار والصلاحيات'],
-  ['roles:manage', 'إنشاء الأدوار وتعديل صلاحياتها', 'الأدوار والصلاحيات'],
-  ['audit:read', 'عرض سجل التدقيق', 'التدقيق'],
-  ['audit:export', 'تصدير سجل التدقيق', 'التدقيق'],
-  ['sessions:read_all', 'عرض جلسات جميع المستخدمين', 'الجلسات'],
-  ['sessions:revoke_any', 'إنهاء جلسة أي مستخدم', 'الجلسات'],
-  ['resources:public:read', 'قراءة المستندات العامة', 'موارد المؤسسة'],
-  ['resources:hr:read', 'قراءة ملفات الموارد البشرية', 'موارد المؤسسة'],
-  ['resources:finance:read', 'قراءة الملفات المالية', 'موارد المؤسسة'],
-  ['resources:it:read', 'قراءة وثائق البنية التحتية', 'موارد المؤسسة'],
+  // ---- IAM administration ----
+  ['dashboard:view', 'عرض لوحة المراقبة الأمنية', 'إدارة الهوية: المراقبة'],
+  ['users:read', 'عرض المستخدمين', 'إدارة الهوية: الحسابات'],
+  ['users:create', 'إنشاء مستخدم', 'إدارة الهوية: الحسابات'],
+  ['users:update', 'تعديل بيانات مستخدم', 'إدارة الهوية: الحسابات'],
+  ['users:disable', 'تفعيل / تعليق / تعطيل حساب', 'إدارة الهوية: الحسابات'],
+  ['users:reset_password', 'إعادة تعيين كلمة المرور والمصادقة الثنائية', 'إدارة الهوية: الحسابات'],
+  ['users:unlock', 'فك قفل الحساب', 'إدارة الهوية: الحسابات'],
+  ['roles:read', 'عرض الأدوار والصلاحيات', 'إدارة الهوية: الأدوار'],
+  ['roles:assign', 'إسناد الأدوار للمستخدمين', 'إدارة الهوية: الأدوار'],
+  ['roles:manage', 'إنشاء الأدوار وتعديل صلاحياتها', 'إدارة الهوية: الأدوار'],
+  ['audit:read', 'عرض سجل التدقيق', 'إدارة الهوية: التدقيق'],
+  ['audit:export', 'تصدير سجل التدقيق', 'إدارة الهوية: التدقيق'],
+  ['sessions:read_all', 'عرض جلسات جميع المستخدمين', 'إدارة الهوية: الجلسات'],
+  ['sessions:revoke_any', 'إنهاء جلسة أي مستخدم', 'إدارة الهوية: الجلسات'],
+  // ---- Company portal ----
+  ['announcements:read', 'قراءة الإعلانات', 'البوابة العامة'],
+  ['announcements:manage', 'نشر وحذف الإعلانات', 'البوابة العامة'],
+  ['directory:read', 'دليل الموظفين (بيانات الاتصال)', 'البوابة العامة'],
+  ['resources:public:read', 'مكتبة المستندات: العامة', 'مكتبة المستندات'],
+  ['resources:hr:read', 'مكتبة المستندات: الموارد البشرية', 'مكتبة المستندات'],
+  ['resources:finance:read', 'مكتبة المستندات: المالية', 'مكتبة المستندات'],
+  ['resources:it:read', 'مكتبة المستندات: البنية التحتية', 'مكتبة المستندات'],
+  // ---- HR ----
+  ['leave:create', 'تقديم طلب إجازة', 'الموارد البشرية: الإجازات'],
+  ['leave:read:own', 'عرض إجازاتي', 'الموارد البشرية: الإجازات'],
+  ['leave:read:department', 'عرض إجازات موظفي قسمي', 'الموارد البشرية: الإجازات'],
+  ['leave:read:all', 'عرض إجازات جميع الموظفين', 'الموارد البشرية: الإجازات'],
+  ['leave:approve:department', 'اعتماد إجازات قسمي', 'الموارد البشرية: الإجازات'],
+  ['leave:approve:all', 'اعتماد أي إجازة', 'الموارد البشرية: الإجازات'],
+  ['hr_records:read', 'عرض ملفات الموظفين الكاملة', 'الموارد البشرية: الملفات'],
+  ['hr_records:update', 'تعديل ملفات الموظفين', 'الموارد البشرية: الملفات'],
+  ['salary:read', 'رؤية الرواتب والحسابات المصرفية (حقل حساس)', 'الموارد البشرية: الملفات'],
+  ['payroll:read:own', 'عرض قسائم راتبي', 'الرواتب'],
+  ['payroll:read', 'عرض مسيّرات الرواتب', 'الرواتب'],
+  ['payroll:prepare', 'إعداد مسيّر الرواتب', 'الرواتب'],
+  ['payroll:approve', 'اعتماد مسيّر الرواتب', 'الرواتب'],
+  // ---- Finance ----
+  ['invoices:read', 'عرض فواتير الموردين', 'المالية: الفواتير'],
+  ['invoices:create', 'تسجيل فاتورة', 'المالية: الفواتير'],
+  ['invoices:approve', 'اعتماد فاتورة حتى 10 ملايين د.ع', 'المالية: الفواتير'],
+  ['invoices:approve_unlimited', 'اعتماد فاتورة بدون حد أعلى', 'المالية: الفواتير'],
+  ['expenses:create', 'تقديم طلب صرف مصروفات', 'المالية: المصروفات'],
+  ['expenses:read:own', 'عرض مصروفاتي', 'المالية: المصروفات'],
+  ['expenses:read:all', 'عرض مصروفات جميع الموظفين', 'المالية: المصروفات'],
+  ['expenses:approve', 'اعتماد طلبات المصروفات', 'المالية: المصروفات'],
+  // ---- Sales & customer service ----
+  ['customers:read', 'عرض العملاء', 'المبيعات وخدمة العملاء'],
+  ['customers:manage', 'إضافة وتعديل العملاء', 'المبيعات وخدمة العملاء'],
+  ['deals:read:own', 'عرض صفقاتي', 'المبيعات وخدمة العملاء'],
+  ['deals:read:all', 'عرض كل الصفقات', 'المبيعات وخدمة العملاء'],
+  ['deals:manage:own', 'إنشاء وتحديث صفقاتي', 'المبيعات وخدمة العملاء'],
+  ['deals:manage:all', 'تحديث وإعادة إسناد أي صفقة', 'المبيعات وخدمة العملاء'],
+  ['tickets:read', 'عرض تذاكر الدعم', 'المبيعات وخدمة العملاء'],
+  ['tickets:create', 'فتح تذكرة دعم', 'المبيعات وخدمة العملاء'],
+  ['tickets:work', 'معالجة التذاكر المسندة إليّ', 'المبيعات وخدمة العملاء'],
+  ['tickets:assign', 'إسناد التذاكر وإغلاق أي تذكرة', 'المبيعات وخدمة العملاء'],
+  // ---- IT ----
+  ['assets:read:own', 'عرض الأجهزة المسلّمة لي', 'تقنية المعلومات: الأصول'],
+  ['assets:read:all', 'عرض جميع أصول الشركة', 'تقنية المعلومات: الأصول'],
+  ['assets:manage', 'تسليم واسترجاع وصيانة الأصول', 'تقنية المعلومات: الأصول'],
+];
+
+const BASE_EMPLOYEE = [
+  'announcements:read', 'directory:read', 'resources:public:read',
+  'leave:create', 'leave:read:own', 'payroll:read:own',
+  'expenses:create', 'expenses:read:own', 'assets:read:own',
 ];
 
 const ROLES = [
@@ -47,46 +96,64 @@ const ROLES = [
   ['iam_admin', 'مسؤول الهويات', 'إدارة دورة حياة الحسابات وإسناد الأدوار (لا يعدّل السياسات)',
     ['dashboard:view', 'users:read', 'users:create', 'users:update', 'users:disable', 'users:reset_password', 'users:unlock', 'roles:read', 'roles:assign', 'sessions:read_all', 'sessions:revoke_any', 'audit:read']],
   ['security_auditor', 'مدقق أمني', 'صلاحيات قراءة فقط لأغراض التدقيق والمراجعة',
-    ['dashboard:view', 'users:read', 'roles:read', 'audit:read', 'audit:export', 'sessions:read_all']],
-  ['it_support', 'الدعم الفني', 'فك القفل وإعادة تعيين كلمات المرور ووثائق البنية التحتية',
-    ['users:read', 'users:unlock', 'users:reset_password', 'resources:it:read']],
-  ['hr_manager', 'مدير الموارد البشرية', 'الوصول إلى ملفات الموظفين',
-    ['users:read', 'resources:hr:read']],
-  ['finance_officer', 'موظف مالي', 'الوصول إلى الملفات المالية', ['resources:finance:read']],
-  ['employee', 'موظف', 'الدور الأساسي لكل موظف (أقل الصلاحيات)', ['resources:public:read']],
+    ['dashboard:view', 'users:read', 'roles:read', 'audit:read', 'audit:export', 'sessions:read_all', 'invoices:read', 'expenses:read:all', 'payroll:read']],
+  ['executive', 'الإدارة التنفيذية', 'قراءة مؤشرات الأعمال في كل الأقسام دون تعديل',
+    ['customers:read', 'deals:read:all', 'tickets:read', 'invoices:read', 'payroll:read', 'leave:read:all', 'resources:finance:read', 'resources:hr:read']],
+  ['department_manager', 'مدير قسم', 'اعتماد إجازات موظفي قسمه فقط',
+    ['leave:read:department', 'leave:approve:department']],
+  ['it_support', 'الدعم الفني', 'فك القفل وإعادة تعيين كلمات المرور وإدارة الأجهزة',
+    ['users:read', 'users:unlock', 'users:reset_password', 'resources:it:read', 'assets:read:all', 'assets:manage']],
+  ['hr_manager', 'مدير الموارد البشرية', 'الملفات الكاملة والرواتب واعتماد كل الإجازات والإعلانات',
+    ['users:read', 'resources:hr:read', 'announcements:manage', 'leave:read:all', 'leave:approve:all', 'hr_records:read', 'hr_records:update', 'salary:read', 'payroll:read']],
+  ['hr_officer', 'أخصائي موارد بشرية', 'ملفات الموظفين بدون الرواتب، ومتابعة الإجازات',
+    ['resources:hr:read', 'leave:read:all', 'hr_records:read']],
+  ['finance_officer', 'محاسب', 'الفواتير حتى 10 ملايين، المصروفات، إعداد الرواتب',
+    ['resources:finance:read', 'invoices:read', 'invoices:create', 'invoices:approve', 'expenses:read:all', 'expenses:approve', 'payroll:read', 'payroll:prepare']],
+  ['finance_manager', 'المدير المالي', 'اعتماد الفواتير بلا حد واعتماد مسيّر الرواتب',
+    ['resources:finance:read', 'invoices:read', 'invoices:create', 'invoices:approve', 'invoices:approve_unlimited', 'expenses:read:all', 'expenses:approve', 'payroll:read', 'payroll:approve', 'salary:read']],
+  ['sales_manager', 'مدير المبيعات', 'كل العملاء والصفقات وإعادة إسنادها',
+    ['customers:read', 'customers:manage', 'deals:read:all', 'deals:manage:all', 'tickets:read']],
+  ['sales_rep', 'مندوب مبيعات', 'صفقاته فقط',
+    ['customers:read', 'deals:read:own', 'deals:manage:own']],
+  ['cs_supervisor', 'مشرف خدمة العملاء', 'إسناد التذاكر وإغلاقها',
+    ['customers:read', 'tickets:read', 'tickets:create', 'tickets:work', 'tickets:assign']],
+  ['cs_agent', 'موظف خدمة عملاء', 'فتح ومعالجة التذاكر المسندة إليه',
+    ['customers:read', 'tickets:read', 'tickets:create', 'tickets:work']],
+  ['employee', 'موظف', 'الدور الأساسي لكل موظف: الخدمة الذاتية والبوابة العامة', BASE_EMPLOYEE],
 ];
 
 // username, full name, job title, dept code, extra roles, status, mfa, flags
 const USERS = [
-  ['ali.alsaadi', 'علي كريم الساعدي', 'مدير أمن المعلومات (CISO)', 'SEC', ['super_admin'], 'active', true],
+  ['ali.alsaadi', 'علي كريم الساعدي', 'مدير أمن المعلومات (CISO)', 'SEC', ['super_admin', 'department_manager'], 'active', true],
   ['zainab.alobaidi', 'زينب حسين العبيدي', 'مسؤولة إدارة الهويات والوصول', 'SEC', ['iam_admin'], 'active', true],
   ['mustafa.aljubouri', 'مصطفى عادل الجبوري', 'مدقق أمن معلومات', 'SEC', ['security_auditor'], 'active', false],
   ['mohammed.alqaisi', 'محمد ناظم القيسي', 'مدقق داخلي', 'EXEC', ['security_auditor'], 'active', false],
   ['sara.almusawi', 'سارة فاضل الموسوي', 'مهندسة دعم فني', 'IT', ['it_support'], 'active', false],
-  ['laith.alobaidi', 'ليث وسام العبيدي', 'مهندس أنظمة', 'IT', ['it_support'], 'active', true],
+  ['laith.alobaidi', 'ليث وسام العبيدي', 'مدير تقنية المعلومات', 'IT', ['it_support', 'department_manager'], 'active', true],
   ['yasir.alshammari', 'ياسر عبد الله الشمري', 'مهندس شبكات', 'IT', ['it_support'], 'active', false],
   ['rusul.alkarkhi', 'رسل ماجد الكرخي', 'مطورة برمجيات', 'IT', [], 'active', false],
-  ['noor.alhashimi', 'نور صباح الهاشمي', 'مديرة الموارد البشرية', 'HR', ['hr_manager'], 'active', false],
-  ['maryam.aldulaimi', 'مريم أحمد الدليمي', 'أخصائية توظيف', 'HR', ['hr_manager'], 'active', false],
-  ['hussein.alkhafaji', 'حسين محمد الخفاجي', 'المدير المالي', 'FIN', ['finance_officer'], 'active', false],
+  ['noor.alhashimi', 'نور صباح الهاشمي', 'مديرة الموارد البشرية', 'HR', ['hr_manager', 'department_manager'], 'active', false],
+  ['maryam.aldulaimi', 'مريم أحمد الدليمي', 'أخصائية توظيف', 'HR', ['hr_officer'], 'active', false],
+  ['hussein.alkhafaji', 'حسين محمد الخفاجي', 'المدير المالي', 'FIN', ['finance_manager', 'department_manager'], 'active', false],
   ['haider.altamimi', 'حيدر جاسم التميمي', 'محاسب أول', 'FIN', ['finance_officer'], 'active', false],
   ['dalia.alazzawi', 'داليا كريم العزاوي', 'محاسبة', 'FIN', ['finance_officer'], 'suspended', false],
-  ['ahmed.albayati', 'أحمد سلمان البياتي', 'مدير المبيعات', 'SAL', [], 'active', false],
-  ['omar.alani', 'عمر طارق العاني', 'مندوب مبيعات', 'SAL', [], 'active', false],
-  ['shahad.aljanabi', 'شهد ليث الجنابي', 'مندوبة مبيعات', 'SAL', [], 'active', false, { mustChange: true }],
-  ['fatima.alrubaie', 'فاطمة علي الربيعي', 'موظفة خدمة عملاء', 'CS', [], 'active', false],
-  ['abbas.alsudani', 'عباس جواد السوداني', 'مشرف خدمة العملاء', 'CS', [], 'active', false, { locked: true }],
-  ['zahraa.alhilli', 'زهراء عباس الحلي', 'موظفة خدمة عملاء', 'CS', [], 'active', false],
-  ['karrar.alzubaidi', 'كرار حسن الزبيدي', 'مندوب مبيعات (موظف سابق)', 'SAL', [], 'disabled', false],
+  ['ahmed.albayati', 'أحمد سلمان البياتي', 'مدير المبيعات', 'SAL', ['sales_manager', 'department_manager'], 'active', false],
+  ['omar.alani', 'عمر طارق العاني', 'مندوب مبيعات', 'SAL', ['sales_rep'], 'active', false],
+  ['shahad.aljanabi', 'شهد ليث الجنابي', 'مندوبة مبيعات', 'SAL', ['sales_rep'], 'active', false, { mustChange: true }],
+  ['fatima.alrubaie', 'فاطمة علي الربيعي', 'موظفة خدمة عملاء', 'CS', ['cs_agent'], 'active', false],
+  ['abbas.alsudani', 'عباس جواد السوداني', 'مشرف خدمة العملاء', 'CS', ['cs_supervisor', 'department_manager'], 'active', false, { locked: true }],
+  ['zahraa.alhilli', 'زهراء عباس الحلي', 'موظفة خدمة عملاء', 'CS', ['cs_agent'], 'active', false],
+  ['karrar.alzubaidi', 'كرار حسن الزبيدي', 'مندوب مبيعات (موظف سابق)', 'SAL', ['sales_rep'], 'disabled', false],
   ['hiba.alnuaimi', 'هبة سعد النعيمي', null, 'HR', [], 'pending', false],
   ['ali.alfatlawi', 'علي رحيم الفتلاوي', null, 'CS', [], 'pending', false],
+  ['ammar.alrawi', 'عمار فاروق الراوي', 'المدير التنفيذي', 'EXEC', ['executive', 'department_manager'], 'active', false],
 ];
 
 const RESOURCES = [
   ['public', 'سياسة الاستخدام المقبول لأنظمة المعلومات', 'تحدد هذه السياسة الاستخدام المسموح لأجهزة الشركة والبريد الإلكتروني والإنترنت. يُمنع مشاركة كلمات المرور أو تثبيت برامج غير مرخّصة، ويجب الإبلاغ عن أي رسالة تصيّد إلى فريق أمن المعلومات خلال 24 ساعة.', 'عام'],
   ['public', 'دليل الموظف الجديد 2026', 'مرحباً بك في شركة الرافدين للحلول التقنية. يشرح الدليل ساعات الدوام (8:00 - 4:00)، وآلية طلب الإجازات عبر بوابة الموارد البشرية، وخطوات تفعيل المصادقة الثنائية لحسابك خلال أول أسبوع.', 'عام'],
   ['public', 'جدول العطل الرسمية لعام 2026', 'يتضمن العطل الرسمية المعتمدة من الأمانة العامة لمجلس الوزراء، ومنها رأس السنة الميلادية، عيد نوروز (21 آذار)، عيد العمال (1 أيار)، ذكرى ثورة 14 تموز، والعيد الوطني (3 تشرين الأول)، إضافة إلى عيدي الفطر والأضحى.', 'عام'],
-  ['hr', 'كشف رواتب شهر تشرين الأول 2026', 'إجمالي الرواتب: 187,450,000 دينار عراقي لعدد 22 موظفاً. متوسط الراتب الأساسي 6,200,000 د.ع. تم تحويل الرواتب إلى مصرف الرافدين بتاريخ 2026-10-28.', 'سري'],
+  ['hr', 'سلّم الرواتب المعتمد لعام 2026', 'الدرجة الخامسة (موظف): 1,100,000 – 1,500,000 د.ع. الدرجة الرابعة (أخصائي): 1,600,000 – 2,200,000 د.ع. الدرجة الثالثة (مهندس أول/محاسب أول): 2,300,000 – 3,000,000 د.ع. الدرجة الثانية (مدير قسم): 3,500,000 – 4,800,000 د.ع. الدرجة الأولى (إدارة عليا): 5,500,000 فأكثر. المخصصات 20% من الراتب الأساسي، واستقطاع الضمان الاجتماعي 5%.', 'سري'],
   ['hr', 'تقييمات الأداء - الربع الثالث 2026', 'نسبة الموظفين بتقدير "ممتاز": 27%، "جيد جداً": 45%، "جيد": 23%، "يحتاج تطوير": 5%. يوصى بترقية موظفَين في قسم تقنية المعلومات وموظف في قسم المبيعات.', 'سري'],
   ['hr', 'ملف التوظيف - دفعة تشرين الثاني', 'مرشحتان قيد المراجعة لقسمي الموارد البشرية وخدمة العملاء. الحسابات أُنشئت بحالة "بانتظار الموافقة" ولا يتم تفعيلها قبل توقيع العقد وتعهد السرية.', 'سري'],
   ['finance', 'الموازنة التشغيلية لعام 2026', 'إجمالي الموازنة المعتمدة: 3.2 مليار دينار عراقي. الرواتب 58%، البنية التحتية والتراخيص 22%، التسويق 9%، التدريب 4%، احتياطي 7%.', 'سري للغاية'],
@@ -123,7 +190,9 @@ function at(daysAgo, hourUtc, minute = Math.floor(rand() * 60)) {
 
 async function seed({ reset = false } = {}) {
   if (reset) {
-    db.exec(`DELETE FROM audit_logs; DELETE FROM sessions; DELETE FROM mfa_recovery_codes; DELETE FROM password_history;
+    db.exec(`DELETE FROM payslips; DELETE FROM payroll_runs; DELETE FROM leave_requests; DELETE FROM expense_claims; DELETE FROM invoices;
+             DELETE FROM tickets; DELETE FROM deals; DELETE FROM customers; DELETE FROM assets; DELETE FROM announcements; DELETE FROM employee_profiles;
+             DELETE FROM audit_logs; DELETE FROM sessions; DELETE FROM mfa_recovery_codes; DELETE FROM password_history;
              DELETE FROM user_roles; DELETE FROM role_permissions; DELETE FROM users; DELETE FROM roles;
              DELETE FROM permissions; DELETE FROM departments; DELETE FROM resources; DELETE FROM sqlite_sequence;`);
   }
@@ -257,6 +326,9 @@ async function seed({ reset = false } = {}) {
     log(at(5, 19, 40), hussein, 'auth.refresh_token_reuse', 'denied', {
       ip: ATTACK_IPS[2], ua: AGENTS[0], targetType: 'session', targetId: 'c7a1e0d2-5b9f-4e1a-9d3c-2f8b6a4e1c07', details: { note: 'Possible token theft – session revoked' },
     });
+
+    // ---- Business content protected by the IAM rules ----
+    require('./seed-business').seedBusiness({ db, byName, deptId, roleId, log, at, fmt, now });
 
     events.sort((a, b) => a.created_at.localeCompare(b.created_at));
     for (const e of events) {

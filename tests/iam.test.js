@@ -287,10 +287,10 @@ describe('Identity lifecycle (Joiner / Mover / Leaver)', () => {
   });
 
   test('leaver: disabling an account kills its live sessions at once', async () => {
-    const victim = client(); await victim.login('fatima.alrubaie');
+    const victim = client(); await victim.login('yasir.alshammari');
     assert.equal((await victim.call('GET', '/api/auth/me')).status, 200);
     const admin = client(); await admin.login('zainab.alobaidi');
-    const id = db.get("SELECT id FROM users WHERE username = 'fatima.alrubaie'").id;
+    const id = db.get("SELECT id FROM users WHERE username = 'yasir.alshammari'").id;
     await admin.call('PATCH', `/api/users/${id}/status`, { status: 'disabled', reason: 'test' });
     assert.equal((await victim.call('GET', '/api/auth/me')).status, 401);
     assert.equal((await victim.call('POST', '/api/auth/refresh')).status, 401);
@@ -304,5 +304,119 @@ describe('Security headers', () => {
     assert.match(res.headers.get('content-security-policy'), /frame-ancestors 'none'/);
     assert.equal(res.headers.get('x-content-type-options'), 'nosniff');
     assert.equal(res.headers.get('x-powered-by'), null);
+  });
+});
+
+// =====================================================================
+// Business modules: the same IAM layer protecting real content
+// =====================================================================
+const idOf = (u) => db.get('SELECT id FROM users WHERE username = ?', u).id;
+
+describe('Data scope (own / department / all)', () => {
+  test('leave: employee sees only own, manager sees his department, HR sees everyone', async () => {
+    const emp = client(); await emp.login('omar.alani');
+    const own = (await emp.call('GET', '/api/hr/leave')).data;
+    assert.equal(own.scope, 'own');
+    assert.ok(own.rows.every((r) => r.user_id === idOf('omar.alani')));
+    // asking for a wider scope than you hold silently falls back to your own
+    assert.equal((await emp.call('GET', '/api/hr/leave?scope=all')).data.scope, 'own');
+
+    const mgr = client(); await mgr.login('ahmed.albayati');
+    const dept = (await mgr.call('GET', '/api/hr/leave')).data;
+    assert.equal(dept.scope, 'department');
+    const salesDept = db.get("SELECT id FROM departments WHERE code = 'SAL'").id;
+    assert.ok(dept.rows.every((r) => r.department_id === salesDept));
+
+    const hr = client(); await hr.login('noor.alhashimi');
+    const all = (await hr.call('GET', '/api/hr/leave')).data;
+    assert.equal(all.scope, 'all');
+    assert.equal(all.rows.length, db.get('SELECT COUNT(*) n FROM leave_requests').n);
+  });
+
+  test('deals: a sales rep cannot read or edit a colleague\'s deal', async () => {
+    const rep = client(); await rep.login('omar.alani');
+    const mine = (await rep.call('GET', '/api/ops/deals')).data;
+    assert.ok(mine.rows.every((d) => d.owner_id === idOf('omar.alani')));
+    const other = db.get('SELECT id FROM deals WHERE owner_id != ? LIMIT 1', idOf('omar.alani'));
+    const r = await rep.call('PATCH', `/api/ops/deals/${other.id}`, { stage: 'won' });
+    assert.equal(r.status, 403);
+    const own = mine.rows[0];
+    assert.equal((await rep.call('PATCH', `/api/ops/deals/${own.id}`, { stage: 'negotiation' })).status, 200);
+    // re-assigning even his own deal requires the manager permission
+    assert.equal((await rep.call('PATCH', `/api/ops/deals/${own.id}`, { ownerId: idOf('shahad.aljanabi') })).status, 403);
+  });
+});
+
+describe('Business rules on top of RBAC', () => {
+  test('leave: a manager cannot approve his own request or another department\'s', async () => {
+    const mgr = client(); await mgr.login('ahmed.albayati');
+    const own = db.get("SELECT id FROM leave_requests WHERE user_id = ? AND status = 'pending'", idOf('ahmed.albayati'));
+    assert.equal((await mgr.call('POST', `/api/hr/leave/${own.id}/decision`, { decision: 'approve' })).status, 403);
+    const foreign = db.get(`SELECT l.id FROM leave_requests l JOIN users u ON u.id = l.user_id
+      WHERE l.status = 'pending' AND u.department_id != (SELECT department_id FROM users WHERE username = 'ahmed.albayati')`);
+    assert.equal((await mgr.call('POST', `/api/hr/leave/${foreign.id}/decision`, { decision: 'approve' })).status, 403);
+    const team = db.get("SELECT id FROM leave_requests WHERE user_id = ? AND status = 'pending'", idOf('omar.alani'));
+    assert.equal((await mgr.call('POST', `/api/hr/leave/${team.id}/decision`, { decision: 'approve' })).status, 200);
+    // and the employee himself has no approve permission at all
+    const emp = client(); await emp.login('omar.alani');
+    assert.equal((await emp.call('POST', `/api/hr/leave/${own.id}/decision`, { decision: 'approve' })).status, 403);
+  });
+
+  test('invoices: maker-checker and approval limit', async () => {
+    const acc = client(); await acc.login('haider.altamimi');
+    const ownInv = db.get("SELECT id FROM invoices WHERE status = 'pending' AND created_by = ? AND amount <= 10000000", idOf('haider.altamimi'));
+    assert.equal((await acc.call('POST', `/api/finance/invoices/${ownInv.id}/decision`, { decision: 'approve' })).status, 403);
+    const big = db.get("SELECT id FROM invoices WHERE status = 'pending' AND created_by != ? AND amount > 10000000", idOf('haider.altamimi'));
+    const r = await acc.call('POST', `/api/finance/invoices/${big.id}/decision`, { decision: 'approve' });
+    assert.equal(r.status, 403);
+    assert.deepEqual(r.data.required, ['invoices:approve_unlimited']);
+    const mgr = client(); await mgr.login('hussein.alkhafaji');
+    assert.equal((await mgr.call('POST', `/api/finance/invoices/${big.id}/decision`, { decision: 'approve' })).status, 200);
+    const ev = db.get("SELECT details FROM audit_logs WHERE action = 'access.denied' AND actor_username = 'haider.altamimi' ORDER BY id DESC LIMIT 1");
+    assert.match(ev.details, /10,000,000|يتجاوز/);
+  });
+
+  test('payroll: the preparer cannot approve; employees see only their own payslips', async () => {
+    const run = db.get("SELECT id FROM payroll_runs WHERE status = 'draft'");
+    const acc = client(); await acc.login('haider.altamimi');
+    assert.equal((await acc.call('POST', `/api/hr/payroll/runs/${run.id}/approve`)).status, 403);
+    const emp = client(); await emp.login('rusul.alkarkhi');
+    assert.equal((await emp.call('GET', '/api/hr/payroll/runs')).status, 403);
+    const mine = (await emp.call('GET', '/api/hr/payroll/mine')).data;
+    assert.ok(mine.length >= 1);
+    const mgr = client(); await mgr.login('hussein.alkhafaji');
+    assert.equal((await mgr.call('POST', `/api/hr/payroll/runs/${run.id}/approve`)).status, 200);
+  });
+
+  test('tickets: an agent cannot close tickets or work on someone else\'s', async () => {
+    const agent = client(); await agent.login('fatima.alrubaie');
+    const others = db.get("SELECT id FROM tickets WHERE assigned_to IS NOT NULL AND assigned_to != ? AND status IN ('open','in_progress')", idOf('fatima.alrubaie'));
+    assert.equal((await agent.call('PATCH', `/api/ops/tickets/${others.id}`, { action: 'resolve' })).status, 403);
+    const resolved = db.get("SELECT id FROM tickets WHERE status = 'resolved'");
+    assert.equal((await agent.call('PATCH', `/api/ops/tickets/${resolved.id}`, { action: 'close' })).status, 403);
+  });
+});
+
+describe('Field-level security', () => {
+  test('salary and IBAN are hidden without salary:read even when the HR record is readable', async () => {
+    const officer = client(); await officer.login('maryam.aldulaimi');
+    const r = (await officer.call('GET', '/api/hr/records')).data;
+    assert.equal(r.salaryVisible, false);
+    assert.ok(r.rows.every((x) => x.base_salary === null && x.bank_iban.startsWith('•')));
+    // and cannot write them either
+    assert.equal((await officer.call('PATCH', `/api/hr/records/${idOf('omar.alani')}`, { base_salary: 9000000 })).status, 403);
+
+    const manager = client(); await manager.login('noor.alhashimi');
+    const m = (await manager.call('GET', '/api/hr/records')).data;
+    assert.equal(m.salaryVisible, true);
+    assert.ok(m.rows.every((x) => Number.isInteger(x.base_salary)));
+  });
+
+  test('announcements targeted at a department are invisible to other departments', async () => {
+    const sales = client(); await sales.login('omar.alani');
+    const rows = (await sales.call('GET', '/api/hr/announcements')).data.rows;
+    const salesId = db.get("SELECT id FROM departments WHERE code = 'SAL'").id;
+    assert.ok(rows.every((a) => a.department_id === null || a.department_id === salesId));
+    assert.ok(rows.some((a) => a.department_id === salesId));
   });
 });

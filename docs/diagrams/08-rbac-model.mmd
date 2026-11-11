@@ -1,41 +1,47 @@
 flowchart LR
-  subgraph U["المستخدمون (Identities)"]
-    u1["علي الساعدي<br/>CISO"]
-    u2["زينب العبيدي<br/>مسؤولة هويات"]
-    u3["مصطفى الجبوري<br/>مدقق"]
-    u4["سارة الموسوي<br/>دعم فني"]
-    u5["حسين الخفاجي<br/>مالية"]
-    u6["عمر العاني<br/>مبيعات"]
+  subgraph U["المستخدمون"]
+    u1["عمر العاني<br/>مندوب مبيعات"]
+    u2["أحمد البياتي<br/>مدير المبيعات"]
+    u3["حيدر التميمي<br/>محاسب"]
+    u4["حسين الخفاجي<br/>المدير المالي"]
+    u5["مريم الدليمي<br/>أخصائية موارد بشرية"]
+    u6["نور الهاشمي<br/>مديرة الموارد البشرية"]
   end
-  subgraph R["الأدوار (Roles)"]
-    r1[super_admin]
-    r2[iam_admin]
-    r3[security_auditor]
-    r4[it_support]
-    r5[finance_officer]
-    r6[employee]
+  subgraph R["الأدوار"]
+    r0[employee]
+    r1[sales_rep]
+    r2[sales_manager]
+    r3[department_manager]
+    r4[finance_officer]
+    r5[finance_manager]
+    r6[hr_officer]
+    r7[hr_manager]
   end
-  subgraph P["الصلاحيات (resource:action)"]
-    p1["roles:manage"]
-    p2["users:create / update / disable"]
-    p3["roles:assign"]
-    p4["audit:read · audit:export"]
-    p5["users:unlock · users:reset_password"]
-    p6["resources:it:read"]
-    p7["resources:finance:read"]
-    p8["resources:public:read"]
+  subgraph P["الصلاحيات resource:action:scope"]
+    p0["leave:create · leave:read:own<br/>expenses:create · payroll:read:own"]
+    p1["deals:read:own · deals:manage:own"]
+    p2["deals:read:all · deals:manage:all"]
+    p3["leave:read:department<br/>leave:approve:department"]
+    p4["invoices:approve ≤ 10M<br/>payroll:prepare"]
+    p5["invoices:approve_unlimited<br/>payroll:approve · salary:read"]
+    p6["hr_records:read"]
+    p7["hr_records:read · salary:read<br/>leave:approve:all"]
   end
+  u1 & u2 & u3 & u4 & u5 & u6 --> r0
   u1 --> r1
   u2 --> r2
-  u3 --> r3
-  u4 --> r4
-  u5 --> r5
-  u6 --> r6
-  u1 & u2 & u3 & u4 & u5 --> r6
-  r1 -. كل الصلاحيات .-> p1
-  r2 --> p2 & p3 & p5
-  r2 --> p4
-  r3 --> p4
-  r4 --> p5 & p6
-  r5 --> p7
-  r6 --> p8
+  u2 --> r3
+  u4 --> r3
+  u6 --> r3
+  u3 --> r4
+  u4 --> r5
+  u5 --> r6
+  u6 --> r7
+  r0 --> p0
+  r1 --> p1
+  r2 --> p2
+  r3 --> p3
+  r4 --> p4
+  r5 --> p5
+  r6 --> p6
+  r7 --> p7

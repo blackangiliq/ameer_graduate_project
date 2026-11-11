@@ -62,6 +62,12 @@ app.use('/api/audit', protectedApi, require('./routes/audit'));
 app.use('/api/sessions', protectedApi, require('./routes/sessions'));
 app.use('/api/dashboard', protectedApi, require('./routes/dashboard'));
 
+// Business modules: the content protected by IAM
+app.use('/api/portal', protectedApi, require('./routes/apps/portal'));
+app.use('/api/hr', protectedApi, require('./routes/apps/hr'));
+app.use('/api/finance', protectedApi, require('./routes/apps/finance'));
+app.use('/api/ops', protectedApi, require('./routes/apps/operations'));
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 app.use('/api', (req, res) => res.status(404).json({ error: 'المسار غير موجود' }));
 

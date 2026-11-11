@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تذاكر الدعم · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="tickets" data-permission="tickets:read" data-probe="/api/ops/tickets">
+<main class="main" id="main" hidden>
+  <div class="page-head">
+    <div><div class="crumb">المبيعات وخدمة العملاء</div><h1>تذاكر الدعم الفني للعملاء</h1><p>الموظف يعالج التذاكر المسندة إليه فقط، والمشرف يُسند ويغلق.</p></div>
+    <div class="actions" id="headActions"></div>
+  </div>
+  <div id="perms"></div>
+  <div class="card"><div class="toolbar"><div class="tabs" id="view"><button data-v="" class="on">الكل</button><button data-v="mine">المسندة إليّ</button><button data-v="unassigned">غير مسندة</button></div><select id="status"><option value="">كل الحالات</option><option value="open">مفتوحة</option><option value="in_progress">قيد المعالجة</option><option value="resolved">محلولة</option><option value="closed">مغلقة</option></select></div><div class="table-wrap" id="table"></div></div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/module.js"></script>
+<script src="/js/tickets.js"></script>
+</body>
+</html>

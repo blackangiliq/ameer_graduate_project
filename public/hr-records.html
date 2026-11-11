@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ملفات الموظفين · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="records" data-permission="hr_records:read" data-probe="/api/hr/records">
+<main class="main" id="main" hidden>
+  <div class="page-head">
+    <div><div class="crumb">الموارد البشرية</div><h1>ملفات الموظفين</h1><p>أمن على مستوى الحقل: ملف الموظف يتطلب hr_records:read، والراتب ورقم الحساب المصرفي يتطلبان أيضاً salary:read.</p></div>
+    <div class="actions" id="headActions"></div>
+  </div>
+  <div id="perms"></div>
+  <div class="card"><div class="toolbar"><input type="search" id="q" placeholder="بحث"><span class="spacer"></span><span id="salaryNote"></span></div><div class="table-wrap" id="table"></div></div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/module.js"></script>
+<script src="/js/hr-records.js"></script>
+</body>
+</html>

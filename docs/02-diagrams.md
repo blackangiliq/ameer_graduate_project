@@ -2,19 +2,21 @@
 
 # مخططات المشروع
 
-كل مخطط موجود بصيغتين: **صورة PNG** جاهزة للطباعة أو لإدراجها في التقرير الورقي، و**مصدر Mermaid** (ملفات `.mmd` في مجلد `diagrams/`) يعرضه GitHub تلقائياً ويمكن تعديله وإعادة توليده من [mermaid.live](https://mermaid.live).
+كل مخطط بصيغتين: **صورة PNG** للطباعة، و**مصدر Mermaid** (ملفات `.mmd` في `diagrams/`) يعرضه GitHub ويمكن تعديله من [mermaid.live](https://mermaid.live).
 
 | # | المخطط | النوع |
 |---|---|---|
 | 1 | [المخطط المعماري (Architecture)](#01-architecture) | معماري |
-| 2 | [مخطط الكيانات والعلاقات (ERD)](#02-erd) | قاعدة بيانات |
-| 3 | [دورة حياة الهوية (Identity Lifecycle — Joiner / Mover / Leaver)](#03-identity-lifecycle) | مخطط حالات (State) |
-| 4 | [دورة حياة رمز التحديث والجلسة (Token / Session Lifecycle)](#07-token-lifecycle) | مخطط حالات (State) |
-| 5 | [مخطط تدفق تسجيل الدخول (Login Flowchart)](#04-login-flowchart) | مخطط تدفق (Flowchart) |
-| 6 | [مخطط تدفق التفويض لكل طلب (Authorization Flowchart)](#05-authorization-flowchart) | مخطط تدفق (Flowchart) |
-| 7 | [مخطط التتابع: الدخول بخطوتين ثم التجديد ثم الخروج (Sequence Diagram)](#06-auth-sequence) | مخطط تتابع (Sequence) |
-| 8 | [نموذج التحكم بالوصول المبني على الأدوار (RBAC Model)](#08-rbac-model) | نموذج مفاهيمي |
-| 9 | [دورة حياة تطوير النظام (SDLC — النموذج التكراري التزايدي)](#09-sdlc) | دورة حياة التطوير |
+| 2 | [طبقة IAM فوق وحدات الأعمال](#10-business-modules) | معماري |
+| 3 | [مخطط الكيانات والعلاقات (ERD)](#02-erd) | قاعدة بيانات |
+| 4 | [نموذج RBAC مع النطاقات](#08-rbac-model) | نموذج مفاهيمي |
+| 5 | [مخطط تدفق التفويض لكل طلب](#05-authorization-flowchart) | مخطط تدفق (Flowchart) |
+| 6 | [مخطط تدفق اعتماد الإجازة (مثال عملي)](#11-leave-approval-flow) | مخطط تدفق (Flowchart) |
+| 7 | [دورة حياة الهوية (Joiner / Mover / Leaver)](#03-identity-lifecycle) | مخطط حالات (State) |
+| 8 | [دورة حياة رمز التحديث والجلسة](#07-token-lifecycle) | مخطط حالات (State) |
+| 9 | [مخطط تدفق تسجيل الدخول](#04-login-flowchart) | مخطط تدفق (Flowchart) |
+| 10 | [مخطط التتابع: الدخول بخطوتين ثم التجديد ثم الخروج](#06-auth-sequence) | مخطط تتابع (Sequence) |
+| 11 | [دورة حياة تطوير النظام (SDLC)](#09-sdlc) | دورة حياة التطوير |
 
 ---
 
@@ -22,7 +24,7 @@
 
 ## 1. المخطط المعماري (Architecture)
 
-معمارية ثلاثية الطبقات. **طبقة العرض** صفحات HTML/JS في المتصفح تتواصل فقط عبر `api.js` الذي يحفظ رمز الوصول في الذاكرة ويجدده تلقائياً. **طبقة التطبيق** تبدأ بطبقة حماية عامة (Helmet، تحديد المعدل)، ثم مسارات المصادقة العامة `/api/auth`، وكل المسارات الأخرى تمر أولاً بـ **نقطة فرض السياسة (PEP)**: `authenticate` ← `requirePasswordChanged` ← `requirePermission`. المسارات لا تحتوي منطقاً أمنياً معقداً بل تستدعي **طبقة الخدمات**، والخدمات وحدها تتعامل مع **طبقة البيانات** باستعلامات مُعدّة مسبقاً (Prepared Statements).
+معمارية ثلاثية الطبقات. **طبقة العرض** صفحات HTML/JS في المتصفح تتواصل فقط عبر `api.js` الذي يحفظ رمز الوصول في الذاكرة ويجدده تلقائياً. **طبقة التطبيق** تبدأ بطبقة حماية عامة (Helmet، تحديد المعدل)، ثم مسارات المصادقة العامة `/api/auth`، وكل المسارات الأخرى (الإدارة ووحدات الأعمال `/api/hr`, `/api/finance`, `/api/ops`, `/api/portal`) تمر أولاً بـ **نقطة فرض السياسة (PEP)**: `authenticate` ← `requirePasswordChanged` ← `requirePermission / requireAny`. المسارات تستدعي **طبقة الخدمات**، والخدمات وحدها تتعامل مع **طبقة البيانات** باستعلامات مُعدّة مسبقاً (Prepared Statements).
 
 ![المخطط المعماري (Architecture)](diagrams/01-architecture.png)
 
@@ -84,11 +86,61 @@ flowchart TB
 
 ---
 
+<a id="10-business-modules"></a>
+
+## 2. طبقة IAM فوق وحدات الأعمال
+
+الفكرة الأساسية للمشروع: IAM ليس غاية بذاته، بل طبقة تحمي **محتوى حقيقياً**. 12 وحدة أعمال في أربعة مجالات، وكل طلب إلى أي منها يمر بالمصادقة والجلسة ثم التفويض بطبقاته الأربع (صلاحية ← نطاق ← قاعدة عمل ← حقل) ثم يُسجَّل في التدقيق.
+
+![طبقة IAM فوق وحدات الأعمال](diagrams/10-business-modules.png)
+
+<details><summary>مصدر Mermaid</summary>
+
+</div>
+
+```mermaid
+flowchart TB
+  subgraph IAM["طبقة IAM — من أنت وماذا يحق لك"]
+    direction LR
+    A1["المصادقة<br/>كلمة مرور + TOTP"] --> A2["الجلسة<br/>JWT + Refresh"] --> A3["التفويض<br/>صلاحية ← نطاق ← قاعدة ← حقل"] --> A4["التدقيق<br/>audit_logs"]
+  end
+  IAM --> M
+  subgraph M["وحدات الأعمال المحمية (المحتوى)"]
+    direction LR
+    subgraph HR["الموارد البشرية"]
+      h1[الإعلانات] 
+      h2[دليل الموظفين]
+      h3[الإجازات]
+      h4[ملفات الموظفين]
+      h5[الرواتب]
+    end
+    subgraph FIN["المالية"]
+      f1[فواتير الموردين]
+      f2[المصروفات]
+    end
+    subgraph SAL["المبيعات وخدمة العملاء"]
+      s1[العملاء]
+      s2[الصفقات]
+      s3[تذاكر الدعم]
+    end
+    subgraph IT["تقنية المعلومات"]
+      i1[الأجهزة والأصول]
+      i2[مكتبة المستندات]
+    end
+  end
+```
+
+<div dir="rtl">
+
+</details>
+
+---
+
 <a id="02-erd"></a>
 
-## 2. مخطط الكيانات والعلاقات (ERD)
+## 3. مخطط الكيانات والعلاقات (ERD)
 
-المستخدم ينتمي لقسم واحد. العلاقة **مستخدم ↔ دور** و**دور ↔ صلاحية** كثير-إلى-كثير عبر الجدولين الوسيطين `user_roles` و`role_permissions` (المفتاح الأساسي مركّب من العمودين فلا يتكرر الإسناد). للمستخدم عدة جلسات، وسجل كلمات مرور، ورموز استرداد، وأحداث تدقيق. الحقول الحساسة لا تُخزّن صريحة: `password_hash` (bcrypt)، `mfa_secret_enc` (AES-256-GCM)، `refresh_token_hash` و`code_hash` (SHA-256).
+21 جدولاً. في الأعلى جداول الهوية والتفويض (users, roles, permissions والجداول الوسيطة)، وفي الأسفل جداول المحتوى المحمي. لاحظ أن كل جدول أعمال يرتبط بالمستخدم بعمود **ملكية** (`user_id`, `owner_id`, `assigned_to`, `created_by`) — هذا العمود هو ما تعتمد عليه قواعد النطاق «بياناتي/قسمي» وقواعد فصل المهام «لا تعتمد ما أنشأته». الحقول الحساسة لا تُخزّن صريحة (bcrypt، AES-256-GCM، SHA-256)، والراتب و IBAN محجوبان على مستوى الحقل.
 
 ![مخطط الكيانات والعلاقات (ERD)](diagrams/02-erd.png)
 
@@ -107,6 +159,18 @@ erDiagram
   USERS ||--o{ PASSWORD_HISTORY : "له"
   USERS ||--o{ MFA_RECOVERY_CODES : "له"
   USERS ||--o{ AUDIT_LOGS : "ينفّذ"
+  USERS ||--|| EMPLOYEE_PROFILES : "ملف وظيفي"
+  USERS ||--o{ LEAVE_REQUESTS : "يطلب / يعتمد"
+  USERS ||--o{ EXPENSE_CLAIMS : "يقدّم"
+  PAYROLL_RUNS ||--o{ PAYSLIPS : "يحتوي"
+  USERS ||--o{ PAYSLIPS : "يستلم"
+  USERS ||--o{ INVOICES : "يسجّل / يعتمد"
+  CUSTOMERS ||--o{ DEALS : "له"
+  USERS ||--o{ DEALS : "يملك"
+  CUSTOMERS ||--o{ TICKETS : "يفتح"
+  USERS ||--o{ TICKETS : "مسندة إلى"
+  USERS ||--o{ ASSETS : "يستلم"
+  DEPARTMENTS ||--o{ ANNOUNCEMENTS : "موجّه إلى"
 
   DEPARTMENTS { int id PK
     text name
@@ -162,6 +226,203 @@ erDiagram
     text category "public|hr|finance|it"
     text title
     text classification }
+  EMPLOYEE_PROFILES { int user_id PK,FK
+    text employee_no
+    text national_id
+    int base_salary "حقل حساس"
+    text bank_iban "حقل حساس" }
+  LEAVE_REQUESTS { int id PK
+    int user_id FK
+    text type
+    int days
+    text status
+    int reviewed_by FK }
+  PAYROLL_RUNS { int id PK
+    text period
+    text status
+    int prepared_by FK
+    int approved_by FK }
+  PAYSLIPS { int id PK
+    int run_id FK
+    int user_id FK
+    int net }
+  INVOICES { int id PK
+    text number
+    int amount
+    int created_by FK
+    int approved_by FK }
+  EXPENSE_CLAIMS { int id PK
+    int user_id FK
+    int amount
+    text status }
+  CUSTOMERS { int id PK
+    text name
+    int account_manager_id FK }
+  DEALS { int id PK
+    int customer_id FK
+    int owner_id FK
+    int value
+    text stage }
+  TICKETS { int id PK
+    int customer_id FK
+    int assigned_to FK
+    text status }
+  ASSETS { int id PK
+    text tag
+    int assigned_to FK
+    text status }
+  ANNOUNCEMENTS { int id PK
+    int department_id FK "NULL = الجميع" }
+```
+
+<div dir="rtl">
+
+</details>
+
+---
+
+<a id="08-rbac-model"></a>
+
+## 4. نموذج RBAC مع النطاقات
+
+أمثلة حقيقية من البيانات: كل موظف يملك دور `employee` (خدمة ذاتية: إجازاتي، قسائمي، مصروفاتي) إضافة إلى دوره الوظيفي. الصلاحيات بصيغة `مورد:إجراء:نطاق`. لاحظ **التدرّج**: `deals:read:own` للمندوب و`deals:read:all` للمدير، و`invoices:approve` (حتى 10 ملايين) للمحاسب و`invoices:approve_unlimited` للمدير المالي، و`hr_records:read` لأخصائية الموارد البشرية بدون `salary:read`.
+
+![نموذج RBAC مع النطاقات](diagrams/08-rbac-model.png)
+
+<details><summary>مصدر Mermaid</summary>
+
+</div>
+
+```mermaid
+flowchart LR
+  subgraph U["المستخدمون"]
+    u1["عمر العاني<br/>مندوب مبيعات"]
+    u2["أحمد البياتي<br/>مدير المبيعات"]
+    u3["حيدر التميمي<br/>محاسب"]
+    u4["حسين الخفاجي<br/>المدير المالي"]
+    u5["مريم الدليمي<br/>أخصائية موارد بشرية"]
+    u6["نور الهاشمي<br/>مديرة الموارد البشرية"]
+  end
+  subgraph R["الأدوار"]
+    r0[employee]
+    r1[sales_rep]
+    r2[sales_manager]
+    r3[department_manager]
+    r4[finance_officer]
+    r5[finance_manager]
+    r6[hr_officer]
+    r7[hr_manager]
+  end
+  subgraph P["الصلاحيات resource:action:scope"]
+    p0["leave:create · leave:read:own<br/>expenses:create · payroll:read:own"]
+    p1["deals:read:own · deals:manage:own"]
+    p2["deals:read:all · deals:manage:all"]
+    p3["leave:read:department<br/>leave:approve:department"]
+    p4["invoices:approve ≤ 10M<br/>payroll:prepare"]
+    p5["invoices:approve_unlimited<br/>payroll:approve · salary:read"]
+    p6["hr_records:read"]
+    p7["hr_records:read · salary:read<br/>leave:approve:all"]
+  end
+  u1 & u2 & u3 & u4 & u5 & u6 --> r0
+  u1 --> r1
+  u2 --> r2
+  u2 --> r3
+  u4 --> r3
+  u6 --> r3
+  u3 --> r4
+  u4 --> r5
+  u5 --> r6
+  u6 --> r7
+  r0 --> p0
+  r1 --> p1
+  r2 --> p2
+  r3 --> p3
+  r4 --> p4
+  r5 --> p5
+  r6 --> p6
+  r7 --> p7
+```
+
+<div dir="rtl">
+
+</details>
+
+---
+
+<a id="05-authorization-flowchart"></a>
+
+## 5. مخطط تدفق التفويض لكل طلب
+
+ما يحدث في **كل** طلب API محمي. بعد المصادقة يمر الطلب بأربع طبقات تفويض (باللون الذهبي): ① **الصلاحية** هل يملك `invoices:approve`؟ ② **النطاق** أي صفوف يراها؟ ③ **قاعدة العمل** على هذا السجل بعينه: ليس طلبه، ضمن حده المالي، من قسمه، مسند إليه. ④ **تصفية الحقول** الحساسة. كل رفض يُسجّل مع سببه.
+
+![مخطط تدفق التفويض لكل طلب](diagrams/05-authorization-flowchart.png)
+
+<details><summary>مصدر Mermaid</summary>
+
+</div>
+
+```mermaid
+flowchart TD
+  A([طلب API محمي<br/>مثال: POST /api/finance/invoices/42/decision]) --> B{يوجد Bearer Token؟}
+  B -- لا --> X1[401 NO_TOKEN]
+  B -- نعم --> C{توقيع JWT صحيح<br/>ولم تنتهِ صلاحيته؟}
+  C -- لا --> X2[401 INVALID / EXPIRED<br/>الواجهة تطلب /refresh تلقائياً]
+  C -- نعم --> E{الجلسة sid فعّالة<br/>والحساب active؟}
+  E -- لا --> X4[401 SESSION_REVOKED / ACCOUNT_INACTIVE]
+  E -- نعم --> G[تحميل الأدوار والصلاحيات<br/>من قاعدة البيانات الآن]
+  G --> H{كلمة مرور مؤقتة؟}
+  H -- نعم --> X6[403 PASSWORD_CHANGE_REQUIRED]
+  H -- لا --> I{"① الصلاحية RBAC<br/>invoices:approve ∈ صلاحياته؟"}
+  I -- لا --> X7[403 FORBIDDEN<br/>+ access.denied]
+  I -- نعم --> S["② النطاق Scope<br/>own / department / all<br/>يقيّد الصفوف المسموح بها"]
+  S --> J{"③ قاعدة العمل على هذا السجل<br/>ليس طلبه هو؟ ضمن حده المالي؟<br/>من قسمه؟ مسند إليه؟"}
+  J -- مخالفة --> X8[403 مع السبب<br/>+ access.denied]
+  J -- سليم --> F["④ تصفية الحقول<br/>إخفاء الراتب و IBAN بدون salary:read"]
+  F --> K[تنفيذ العملية<br/>+ تسجيل الحدث في audit_logs]
+  K --> L([200 OK])
+
+  classDef deny fill:#fbe7e5,stroke:#b4281f,color:#7c1a14
+  classDef ok fill:#e2f3ef,stroke:#0e7a6d,color:#0a5c52
+  classDef layer fill:#fbf0dc,stroke:#b7791f,color:#5c3d08
+  class X1,X2,X4,X6,X7,X8 deny
+  class L,K ok
+  class I,S,J,F layer
+```
+
+<div dir="rtl">
+
+</details>
+
+---
+
+<a id="11-leave-approval-flow"></a>
+
+## 6. مخطط تدفق اعتماد الإجازة (مثال عملي)
+
+مثال كامل لعملية أعمال محمية: من تقديم الطلب حتى ظهور النتيجة. يوضح كيف تمنع القواعد الاعتماد الذاتي والاعتماد من خارج القسم، وكيف يظهر الطلب في «بانتظارك» فقط لمن يملك صلاحية التصرف فيه.
+
+![مخطط تدفق اعتماد الإجازة (مثال عملي)](diagrams/11-leave-approval-flow.png)
+
+<details><summary>مصدر Mermaid</summary>
+
+</div>
+
+```mermaid
+flowchart TD
+  A([الموظف يقدّم طلب إجازة<br/>leave:create]) --> B{الرصيد السنوي كافٍ؟}
+  B -- لا --> B1[400 الرصيد غير كافٍ]
+  B -- نعم --> C[حالة الطلب: pending<br/>+ leave.request في السجل]
+  C --> D[يظهر في «بانتظارك» لمن يملك صلاحية الاعتماد فقط]
+  D --> E{من يحاول الاعتماد؟}
+  E -- "صاحب الطلب نفسه" --> X1[403 لا تعتمد طلبك بنفسك]
+  E -- "مدير قسم آخر" --> X2[403 قسمك فقط]
+  E -- "موظف بلا صلاحية" --> X3[403 FORBIDDEN]
+  E -- "مدير قسمه<br/>leave:approve:department" --> F[اعتماد / رفض]
+  E -- "الموارد البشرية<br/>leave:approve:all" --> F
+  F --> G[تحديث الحالة + المراجِع + التاريخ<br/>leave.approve / leave.reject في السجل]
+  G --> H([يرى الموظف النتيجة في «إجازاتي»])
+  classDef deny fill:#fbe7e5,stroke:#b4281f,color:#7c1a14
+  class X1,X2,X3,B1 deny
 ```
 
 <div dir="rtl">
@@ -172,11 +433,11 @@ erDiagram
 
 <a id="03-identity-lifecycle"></a>
 
-## 3. دورة حياة الهوية (Identity Lifecycle — Joiner / Mover / Leaver)
+## 7. دورة حياة الهوية (Joiner / Mover / Leaver)
 
-يدخل الحساب النظام بطريقتين: **تسجيل ذاتي** (يبقى `pending` حتى موافقة مسؤول الهويات) أو **إنشاء من المسؤول** (نشط لكن بكلمة مرور مؤقتة يجب تغييرها). الحساب النشط قد يُ**قفل مؤقتاً** آلياً بعد 5 محاولات فاشلة، وقد يتغير دوره (**Mover**) ويسري التغيير فوراً، وقد **يُعلّق** مؤقتاً، وعند مغادرة الموظف يُ**عطّل** نهائياً (**Leaver**). كل انتقال إلى حالة غير نشطة **يُنهي جميع جلسات الحساب فوراً**، وكل انتقال يُسجَّل في سجل التدقيق مع السبب.
+يدخل الحساب النظام بطريقتين: **تسجيل ذاتي** (يبقى `pending` حتى موافقة مسؤول الهويات) أو **إنشاء من المسؤول** (نشط بكلمة مرور مؤقتة يجب تغييرها). الحساب النشط قد يُ**قفل مؤقتاً** بعد 5 محاولات فاشلة، وقد يتغير دوره (**Mover**) فيسري فوراً، وقد **يُعلّق**، وعند المغادرة يُ**عطّل** (**Leaver**) وتُنهى كل جلساته فوراً. صفحة الأصول تكشف بعدها الأجهزة التي ما زالت لدى الموظف المغادر.
 
-![دورة حياة الهوية (Identity Lifecycle — Joiner / Mover / Leaver)](diagrams/03-identity-lifecycle.png)
+![دورة حياة الهوية (Joiner / Mover / Leaver)](diagrams/03-identity-lifecycle.png)
 
 <details><summary>مصدر Mermaid</summary>
 
@@ -214,11 +475,11 @@ stateDiagram-v2
 
 <a id="07-token-lifecycle"></a>
 
-## 4. دورة حياة رمز التحديث والجلسة (Token / Session Lifecycle)
+## 8. دورة حياة رمز التحديث والجلسة
 
-رمز التحديث يُصدر عند الدخول، وكل استخدام له يُصدر رمزاً جديداً ويُبطل القديم (**Rotation**). إذا قُدّم رمز قديم مرة أخرى فهذا دليل على أن نسخة منه سُرقت، فتُلغى **الجلسة كاملة** (يخسرها المهاجم والمستخدم معاً، ويضطر المستخدم للدخول من جديد بكلمة المرور وMFA). تنتهي الجلسة أيضاً بتسجيل الخروج، أو إنهائها من المسؤول، أو تغيير كلمة المرور، أو تعطيل الحساب، أو بعد 7 أيام.
+رمز التحديث يُصدر عند الدخول، وكل استخدام له يُصدر رمزاً جديداً ويُبطل القديم (**Rotation**). إذا قُدّم رمز قديم مرة أخرى فهذا دليل سرقة فتُلغى **الجلسة كاملة**. تنتهي الجلسة أيضاً بتسجيل الخروج، أو إنهائها من المسؤول، أو تغيير كلمة المرور، أو تعطيل الحساب، أو بعد 7 أيام.
 
-![دورة حياة رمز التحديث والجلسة (Token / Session Lifecycle)](diagrams/07-token-lifecycle.png)
+![دورة حياة رمز التحديث والجلسة](diagrams/07-token-lifecycle.png)
 
 <details><summary>مصدر Mermaid</summary>
 
@@ -250,11 +511,11 @@ stateDiagram-v2
 
 <a id="04-login-flowchart"></a>
 
-## 5. مخطط تدفق تسجيل الدخول (Login Flowchart)
+## 9. مخطط تدفق تسجيل الدخول
 
-يوضح ترتيب الفحوصات عند الدخول، والترتيب نفسه قرار أمني: (1) **تحديد المعدل** قبل أي عمل مكلف، (2) المستخدم غير الموجود يمر بمقارنة bcrypt وهمية ليتساوى زمن الاستجابة، (3) **فحص القفل قبل فحص كلمة المرور** حتى لا يستمر التخمين على حساب مقفل، (4) فحص الحالة بعد كلمة المرور الصحيحة فقط (كي لا نكشف حالة الحساب لمن لا يعرف كلمة مروره)، (5) لا تُنشأ جلسة قبل اجتياز MFA.
+ترتيب الفحوصات قرار أمني: (1) **تحديد المعدل** أولاً، (2) المستخدم غير الموجود يمر بمقارنة bcrypt وهمية ليتساوى الزمن، (3) **فحص القفل قبل كلمة المرور**، (4) فحص الحالة بعد كلمة المرور الصحيحة فقط، (5) لا جلسة قبل اجتياز MFA.
 
-![مخطط تدفق تسجيل الدخول (Login Flowchart)](diagrams/04-login-flowchart.png)
+![مخطط تدفق تسجيل الدخول](diagrams/04-login-flowchart.png)
 
 <details><summary>مصدر Mermaid</summary>
 
@@ -295,59 +556,13 @@ flowchart TD
 
 ---
 
-<a id="05-authorization-flowchart"></a>
-
-## 6. مخطط تدفق التفويض لكل طلب (Authorization Flowchart)
-
-ما يحدث في **كل** طلب API محمي. سبع نقاط رفض محتملة قبل الوصول إلى البيانات. لاحظ أن الصلاحيات تُحمّل من قاعدة البيانات **في كل طلب** ولا تُقرأ من الرمز، فسحب الصلاحية أو تعطيل الحساب أو إنهاء الجلسة يسري فوراً. كل رفض تفويض (403) يُسجّل في سجل التدقيق مع الصلاحية الناقصة.
-
-![مخطط تدفق التفويض لكل طلب (Authorization Flowchart)](diagrams/05-authorization-flowchart.png)
-
-<details><summary>مصدر Mermaid</summary>
-
-</div>
-
-```mermaid
-flowchart TD
-  A([طلب API محمي<br/>مثال: GET /api/audit]) --> B{يوجد Bearer Token؟}
-  B -- لا --> X1[401 NO_TOKEN]
-  B -- نعم --> C{توقيع JWT صحيح<br/>HS256 + issuer؟}
-  C -- لا --> X2[401 INVALID_TOKEN]
-  C -- نعم --> D{انتهت صلاحيته؟<br/>exp}
-  D -- نعم --> X3[401 TOKEN_EXPIRED<br/>الواجهة تطلب /refresh تلقائياً]
-  D -- لا --> E{الجلسة sid موجودة<br/>وغير ملغاة؟}
-  E -- لا --> X4[401 SESSION_REVOKED]
-  E -- نعم --> F{الحساب active؟}
-  F -- لا --> X5[401 ACCOUNT_INACTIVE]
-  F -- نعم --> G[تحميل الأدوار والصلاحيات<br/>من قاعدة البيانات الآن]
-  G --> H{كلمة مرور مؤقتة؟}
-  H -- نعم --> X6[403 PASSWORD_CHANGE_REQUIRED]
-  H -- لا --> I{"الصلاحية المطلوبة<br/>audit:read ∈ صلاحيات المستخدم؟"}
-  I -- لا --> X7[403 FORBIDDEN<br/>+ تسجيل access.denied]
-  I -- نعم --> J{قواعد إضافية؟<br/>تعديل الذات / المدير العام}
-  J -- مخالفة --> X8[403 منع تصعيد الصلاحيات]
-  J -- سليم --> K[تنفيذ العملية<br/>+ تسجيل الحدث في audit_logs]
-  K --> L([200 OK])
-
-  classDef deny fill:#fbe7e5,stroke:#b4281f,color:#7c1a14
-  classDef ok fill:#e2f3ef,stroke:#0e7a6d,color:#0a5c52
-  class X1,X2,X3,X4,X5,X6,X7,X8 deny
-  class L,K ok
-```
-
-<div dir="rtl">
-
-</details>
-
----
-
 <a id="06-auth-sequence"></a>
 
-## 7. مخطط التتابع: الدخول بخطوتين ثم التجديد ثم الخروج (Sequence Diagram)
+## 10. مخطط التتابع: الدخول بخطوتين ثم التجديد ثم الخروج
 
-التسلسل الزمني للرسائل بين المستخدم والمتصفح والخادم وقاعدة البيانات: الخطوة الأولى (كلمة المرور) تعيد `challengeToken` فقط، والخطوة الثانية (TOTP) تنشئ الجلسة. عند انتهاء رمز الوصول بعد 15 دقيقة يحصل `api.js` تلقائياً على رمز جديد عبر الـ Cookie ويعيد الطلب دون أن يشعر المستخدم (**Silent Refresh**).
+التسلسل الزمني للرسائل بين المستخدم والمتصفح والخادم وقاعدة البيانات، بما فيه التجديد الصامت (Silent Refresh) عند انتهاء رمز الوصول.
 
-![مخطط التتابع: الدخول بخطوتين ثم التجديد ثم الخروج (Sequence Diagram)](diagrams/06-auth-sequence.png)
+![مخطط التتابع: الدخول بخطوتين ثم التجديد ثم الخروج](diagrams/06-auth-sequence.png)
 
 <details><summary>مصدر Mermaid</summary>
 
@@ -402,75 +617,13 @@ sequenceDiagram
 
 ---
 
-<a id="08-rbac-model"></a>
-
-## 8. نموذج التحكم بالوصول المبني على الأدوار (RBAC Model)
-
-مثال من البيانات الحقيقية: كل موظف يملك دور `employee` إضافة إلى دوره الوظيفي. الصلاحيات تُمنح للأدوار لا للأشخاص؛ فعند انضمام محاسب جديد يكفي إسناد دور `finance_officer` له. لاحظ **فصل المهام**: `iam_admin` يُسند الأدوار لكنه لا يملك `roles:manage` لتعديل ما تحتويه الأدوار.
-
-![نموذج التحكم بالوصول المبني على الأدوار (RBAC Model)](diagrams/08-rbac-model.png)
-
-<details><summary>مصدر Mermaid</summary>
-
-</div>
-
-```mermaid
-flowchart LR
-  subgraph U["المستخدمون (Identities)"]
-    u1["علي الساعدي<br/>CISO"]
-    u2["زينب العبيدي<br/>مسؤولة هويات"]
-    u3["مصطفى الجبوري<br/>مدقق"]
-    u4["سارة الموسوي<br/>دعم فني"]
-    u5["حسين الخفاجي<br/>مالية"]
-    u6["عمر العاني<br/>مبيعات"]
-  end
-  subgraph R["الأدوار (Roles)"]
-    r1[super_admin]
-    r2[iam_admin]
-    r3[security_auditor]
-    r4[it_support]
-    r5[finance_officer]
-    r6[employee]
-  end
-  subgraph P["الصلاحيات (resource:action)"]
-    p1["roles:manage"]
-    p2["users:create / update / disable"]
-    p3["roles:assign"]
-    p4["audit:read · audit:export"]
-    p5["users:unlock · users:reset_password"]
-    p6["resources:it:read"]
-    p7["resources:finance:read"]
-    p8["resources:public:read"]
-  end
-  u1 --> r1
-  u2 --> r2
-  u3 --> r3
-  u4 --> r4
-  u5 --> r5
-  u6 --> r6
-  u1 & u2 & u3 & u4 & u5 --> r6
-  r1 -. كل الصلاحيات .-> p1
-  r2 --> p2 & p3 & p5
-  r2 --> p4
-  r3 --> p4
-  r4 --> p5 & p6
-  r5 --> p7
-  r6 --> p8
-```
-
-<div dir="rtl">
-
-</details>
-
----
-
 <a id="09-sdlc"></a>
 
-## 9. دورة حياة تطوير النظام (SDLC — النموذج التكراري التزايدي)
+## 11. دورة حياة تطوير النظام (SDLC)
 
-المراحل السبع التي مرّ بها المشروع، مع تغذية راجعة من مرحلة الصيانة والمراقبة إلى مرحلة التحليل؛ فما يكشفه سجل التدقيق من هجمات يتحول إلى متطلبات أمنية جديدة في التكرار التالي.
+المراحل السبع بالنموذج التكراري التزايدي، مع تغذية راجعة من المراقبة إلى التحليل. التكرار الخامس أضاف وحدات الأعمال فوق طبقة IAM.
 
-![دورة حياة تطوير النظام (SDLC — النموذج التكراري التزايدي)](diagrams/09-sdlc.png)
+![دورة حياة تطوير النظام (SDLC)](diagrams/09-sdlc.png)
 
 <details><summary>مصدر Mermaid</summary>
 
@@ -481,7 +634,7 @@ flowchart LR
   A["1. التخطيط وجمع المتطلبات<br/>تحديد مشاكل إدارة الوصول<br/>والمتطلبات الوظيفية والأمنية"] --> B["2. التحليل<br/>تحليل التهديدات (STRIDE)<br/>حالات الاستخدام · الأدوار"]
   B --> C["3. التصميم<br/>المعمارية الطبقية · ERD<br/>مخططات التدفق · واجهات"]
   C --> D["4. التنفيذ<br/>Node.js + Express<br/>SQLite + JavaScript"]
-  D --> E["5. الاختبار<br/>23 اختباراً آلياً<br/>+ اختبار يدوي للواجهات"]
+  D --> E["5. الاختبار<br/>31 اختباراً آلياً<br/>+ اختبار يدوي للواجهات"]
   E --> F["6. النشر والتشغيل<br/>npm start · متغيرات البيئة<br/>HTTPS خلف Reverse Proxy"]
   F --> G["7. الصيانة والمراقبة<br/>سجل التدقيق · لوحة المراقبة<br/>مراجعة الوصول الدورية"]
   G -. تغذية راجعة / تكرار .-> B

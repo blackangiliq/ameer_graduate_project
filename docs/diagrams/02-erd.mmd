@@ -8,6 +8,18 @@ erDiagram
   USERS ||--o{ PASSWORD_HISTORY : "له"
   USERS ||--o{ MFA_RECOVERY_CODES : "له"
   USERS ||--o{ AUDIT_LOGS : "ينفّذ"
+  USERS ||--|| EMPLOYEE_PROFILES : "ملف وظيفي"
+  USERS ||--o{ LEAVE_REQUESTS : "يطلب / يعتمد"
+  USERS ||--o{ EXPENSE_CLAIMS : "يقدّم"
+  PAYROLL_RUNS ||--o{ PAYSLIPS : "يحتوي"
+  USERS ||--o{ PAYSLIPS : "يستلم"
+  USERS ||--o{ INVOICES : "يسجّل / يعتمد"
+  CUSTOMERS ||--o{ DEALS : "له"
+  USERS ||--o{ DEALS : "يملك"
+  CUSTOMERS ||--o{ TICKETS : "يفتح"
+  USERS ||--o{ TICKETS : "مسندة إلى"
+  USERS ||--o{ ASSETS : "يستلم"
+  DEPARTMENTS ||--o{ ANNOUNCEMENTS : "موجّه إلى"
 
   DEPARTMENTS { int id PK
     text name
@@ -63,3 +75,50 @@ erDiagram
     text category "public|hr|finance|it"
     text title
     text classification }
+  EMPLOYEE_PROFILES { int user_id PK,FK
+    text employee_no
+    text national_id
+    int base_salary "حقل حساس"
+    text bank_iban "حقل حساس" }
+  LEAVE_REQUESTS { int id PK
+    int user_id FK
+    text type
+    int days
+    text status
+    int reviewed_by FK }
+  PAYROLL_RUNS { int id PK
+    text period
+    text status
+    int prepared_by FK
+    int approved_by FK }
+  PAYSLIPS { int id PK
+    int run_id FK
+    int user_id FK
+    int net }
+  INVOICES { int id PK
+    text number
+    int amount
+    int created_by FK
+    int approved_by FK }
+  EXPENSE_CLAIMS { int id PK
+    int user_id FK
+    int amount
+    text status }
+  CUSTOMERS { int id PK
+    text name
+    int account_manager_id FK }
+  DEALS { int id PK
+    int customer_id FK
+    int owner_id FK
+    int value
+    text stage }
+  TICKETS { int id PK
+    int customer_id FK
+    int assigned_to FK
+    text status }
+  ASSETS { int id PK
+    text tag
+    int assigned_to FK
+    text status }
+  ANNOUNCEMENTS { int id PK
+    int department_id FK "NULL = الجميع" }

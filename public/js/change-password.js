@@ -16,7 +16,7 @@
     try {
       await Api.post('/api/auth/change-password', { currentPassword: $('#current').value, newPassword: $('#password').value });
       UI.alert($('#chAlert'), 'تم تعيين كلمة المرور الجديدة، جارٍ التحويل...', 'success');
-      setTimeout(() => { location.href = '/resources'; }, 1000);
+      setTimeout(() => { location.href = '/home'; }, 1000);
     } catch (err) {
       UI.alert($('#chAlert'), err.message, 'error', err.data?.details);
     }

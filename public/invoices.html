@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>فواتير الموردين · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="invoices" data-permission="invoices:read" data-probe="/api/finance/invoices">
+<main class="main" id="main" hidden>
+  <div class="page-head">
+    <div><div class="crumb">المالية</div><h1>فواتير الموردين</h1><p>قاعدتان فوق الصلاحية: من يسجّل الفاتورة لا يعتمدها (Maker–Checker)، والمبالغ فوق 10 ملايين د.ع تتطلب المدير المالي.</p></div>
+    <div class="actions" id="headActions"></div>
+  </div>
+  <div id="perms"></div>
+  <div class="kpis" id="totals"></div>
+  <div class="card"><div class="toolbar"><input type="search" id="q" placeholder="بحث: مورد، رقم، وصف"><select id="status"><option value="">كل الحالات</option><option value="pending">قيد الانتظار</option><option value="approved">معتمدة</option><option value="paid">مدفوعة</option><option value="rejected">مرفوضة</option></select><span class="spacer"></span><span class="scope-note" id="limit"></span></div><div class="table-wrap" id="table"></div></div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/module.js"></script>
+<script src="/js/invoices.js"></script>
+</body>
+</html>

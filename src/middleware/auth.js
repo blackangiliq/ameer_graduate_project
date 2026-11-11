@@ -34,7 +34,7 @@ function authenticate(req, res, next) {
   }
 
   const user = db.get(
-    'SELECT id, username, email, full_name, status, must_change_password, mfa_enabled FROM users WHERE id = ?',
+    'SELECT id, username, email, full_name, department_id, status, must_change_password, mfa_enabled FROM users WHERE id = ?',
     Number(payload.sub),
   );
   if (!user || user.status !== 'active') {
@@ -79,4 +79,21 @@ function requirePermission(...needed) {
   };
 }
 
-module.exports = { authenticate, requirePasswordChanged, requirePermission };
+/**
+ * requireAny: at least ONE of the listed permissions. Used for screens that have
+ * several data scopes (e.g. leave:read:own OR leave:read:department OR leave:read:all);
+ * the route then narrows the data to the widest scope the user holds.
+ */
+function requireAny(...options) {
+  return (req, res, next) => {
+    const has = new Set(req.user?.permissions || []);
+    if (options.some((p) => has.has(p))) return next();
+    audit.log(req, {
+      action: 'access.denied', status: 'denied', targetType: 'endpoint',
+      targetId: `${req.method} ${req.baseUrl}${req.path}`, details: { requiredAnyOf: options },
+    });
+    return res.status(403).json({ error: 'ليس لديك صلاحية للوصول إلى هذه الوحدة', code: 'FORBIDDEN', required: options });
+  };
+}
+
+module.exports = { authenticate, requirePasswordChanged, requirePermission, requireAny };

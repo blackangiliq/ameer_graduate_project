@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الرواتب · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="payroll" data-permission="payroll:read:own,payroll:read" data-probe="/api/hr/payroll/runs">
+<main class="main" id="main" hidden>
+  <div class="page-head">
+    <div><div class="crumb">الموارد البشرية</div><h1>الرواتب</h1><p>كل موظف يرى قسائم راتبه فقط. المحاسب يُعدّ المسيّر والمدير المالي يعتمده — ولا يعتمد أحد ما أعدّه بنفسه.</p></div>
+    <div class="actions" id="headActions"></div>
+  </div>
+  <div id="perms"></div>
+  <div class="card" id="runsCard" hidden><div class="card-head"><h3>مسيّرات الرواتب الشهرية</h3><span class="badge b-perm">payroll:read</span></div><div class="table-wrap" id="runs"></div></div>
+  <div class="card" id="detailCard" style="margin-top:16px" hidden><div class="card-head"><h3 id="detailTitle"></h3></div><div class="table-wrap" id="detail"></div></div>
+  <div class="card" id="mineCard" style="margin-top:16px" hidden><div class="card-head"><h3>قسائم راتبي</h3><span class="badge b-perm">payroll:read:own</span></div><div class="table-wrap" id="mine"></div></div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/module.js"></script>
+<script src="/js/payroll.js"></script>
+</body>
+</html>

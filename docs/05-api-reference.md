@@ -122,4 +122,65 @@ curl -s -H "Authorization: Bearer $TOKEN" http://localhost:3000/api/audit
 curl -s -b jar.txt -c jar.txt -X POST http://localhost:3000/api/auth/refresh
 ```
 
+## وحدات الأعمال
+
+كل استجابة قائمة في الوحدات ذات النطاق تحتوي: `scope` (النطاق المطبّق)، `scopes` (النطاقات التي يملكها المستخدم)، وكل صف يحتوي `_actions` (الإجراءات المسموحة له على هذا الصف) و`_note` (سبب المنع إن وُجد). أي مخالفة لقاعدة عمل تُرجع **403** مع سبب واضح وتُسجَّل `access.denied`.
+
+### البوابة — `/api/portal` 🔒
+| الطريقة | المسار | الصلاحية | الوصف |
+|---|---|---|---|
+| GET | `/home` | — | المهام بانتظاري (محسوبة بقواعد الاعتماد)، خدماتي الذاتية، الإعلانات الموجّهة لي |
+
+### الموارد البشرية — `/api/hr` 🔒
+| الطريقة | المسار | الصلاحية | القاعدة |
+|---|---|---|---|
+| GET | `/announcements` | `announcements:read` | العامة + الموجّهة لقسمي |
+| POST / DELETE | `/announcements[/:id]` | `announcements:manage` | |
+| GET | `/directory` | `directory:read` | بيانات اتصال فقط |
+| GET | `/records` · `/records/:id` | `hr_records:read` | الراتب و IBAN تتطلب `salary:read`؛ عرض الملف يُسجَّل |
+| PATCH | `/records/:id` | `hr_records:update` | تعديل الحقول المالية يتطلب `salary:read` |
+| GET | `/leave?scope=own\|department\|all&status=` | أي من `leave:read:*` أو `leave:create` | النطاق يُقيَّد بصلاحياتك |
+| POST | `/leave` | `leave:create` | `{type, startDate, endDate, reason}` — يُحسب أيام العمل ويُفحص الرصيد |
+| POST | `/leave/:id/decision` | `leave:approve:department` أو `:all` | `{decision: approve\|reject, note}` — ليس طلبك، ومن قسمك إن كان نطاقك القسم |
+| POST | `/leave/:id/cancel` | `leave:create` | صاحب الطلب فقط وما دام قيد الانتظار |
+| GET | `/payroll/mine` | `payroll:read:own` | قسائمي المعتمدة |
+| GET | `/payroll/runs` · `/payroll/runs/:id` | `payroll:read` | |
+| POST | `/payroll/runs/:id/approve` | `payroll:approve` | المُعِدّ لا يعتمد |
+
+### المالية — `/api/finance` 🔒
+| الطريقة | المسار | الصلاحية | القاعدة |
+|---|---|---|---|
+| GET | `/invoices?status=&q=` | `invoices:read` | يعيد `limit` (حد اعتمادك) |
+| POST | `/invoices` | `invoices:create` | `{vendor, description, amount, dueDate}` |
+| POST | `/invoices/:id/decision` | `invoices:approve` | ليس من سجّلها؛ فوق 10,000,000 تتطلب `invoices:approve_unlimited` |
+| GET | `/expenses?scope=own\|all` | `expenses:read:*` | |
+| POST | `/expenses` | `expenses:create` | حد 5,000,000 للطلب |
+| POST | `/expenses/:id/decision` | `expenses:approve` | ليس طلبك |
+
+### العمليات — `/api/ops` 🔒
+| الطريقة | المسار | الصلاحية | القاعدة |
+|---|---|---|---|
+| GET | `/customers?q=` | `customers:read` | |
+| POST | `/customers` | `customers:manage` | |
+| GET | `/deals?scope=own\|all` | `deals:read:*` | |
+| POST | `/deals` | `deals:manage:own` أو `:all` | المالك أنت، إلا للمدير |
+| PATCH | `/deals/:id` | `deals:manage:own` أو `:all` | `{stage, value, ownerId}` — صفقاتك فقط؛ `ownerId` للمدير فقط |
+| GET | `/tickets?view=mine\|unassigned&status=` | `tickets:read` | |
+| POST | `/tickets` | `tickets:create` | |
+| PATCH | `/tickets/:id` | `tickets:work` أو `tickets:assign` | `{action: take\|start\|resolve\|close\|assign, assignTo}` — المعالجة للمسند إليه، الإسناد والإغلاق للمشرف |
+| GET | `/assets?scope=own\|all&type=&status=` | `assets:read:*` | يُعلِّم أجهزة الموظفين المعطّلين |
+| PATCH | `/assets/:id` | `assets:manage` | `{status, assignedTo, location}` |
+
+**مثال رفض بسبب قاعدة عمل:**
+
+```http
+POST /api/finance/invoices/35/decision        (المحاسب haider.altamimi)
+{ "decision": "approve" }
+```
+```json
+HTTP/1.1 403 Forbidden
+{ "error": "المبلغ يتجاوز حد اعتمادك (10,000,000 د.ع) — يتطلب المدير المالي",
+  "code": "FORBIDDEN", "required": ["invoices:approve_unlimited"] }
+```
+
 </div>

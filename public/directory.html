@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>دليل الموظفين · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="directory" data-permission="directory:read" data-probe="/api/hr/directory">
+<main class="main" id="main" hidden>
+  <div class="page-head">
+    <div><div class="crumb">البوابة العامة</div><h1>دليل الموظفين</h1><p>بيانات الاتصال فقط. الحقول الحساسة (الراتب، الهوية، العنوان) غير متاحة هنا ولو للمدراء.</p></div>
+    <div class="actions" id="headActions"></div>
+  </div>
+  <div id="perms"></div>
+  <div class="card"><div class="toolbar"><input type="search" id="q" placeholder="بحث بالاسم أو المسمى"><select id="dept"><option value="">كل الأقسام</option></select><span class="spacer"></span><span class="muted" id="count"></span></div><div class="card-body dir-grid" id="list"></div></div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/module.js"></script>
+<script src="/js/directory.js"></script>
+</body>
+</html>

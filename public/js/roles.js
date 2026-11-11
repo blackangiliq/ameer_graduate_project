@@ -40,6 +40,7 @@ document.addEventListener('app:ready', async ({ detail: me }) => {
       UI.toast('تم حفظ صلاحيات الدور');
       await loadRoles();
       select(selected);
+      loadPermMatrix();
       loadMatrix();
     } catch (err) { UI.toast(err.message, 'error'); }
   });
@@ -74,6 +75,15 @@ document.addEventListener('app:ready', async ({ detail: me }) => {
         ${m.roles.map((r) => `<td class="cell"><span class="dot ${u.roleIds.includes(r.id) ? '' : 'off'}" title="${esc(r.label)}"></span></td>`).join('')}</tr>`).join('')}</tbody>`;
   }
 
+  function loadPermMatrix() {
+    const groups = [...new Set(permissions.map((p) => p.category))];
+    $('#permMatrix').innerHTML = `<thead><tr><th>الصلاحية</th>${roles.map((r) => `<th class="rot">${esc(r.label)}</th>`).join('')}</tr></thead><tbody>${
+      groups.map((g) => `<tr><td colspan="${roles.length + 1}" style="background:#faf8f3;font-weight:700;font-size:12.5px;color:var(--muted)">${esc(g)}</td></tr>${
+        permissions.filter((p) => p.category === g).map((p) => `<tr><td><span class="badge b-perm">${esc(p.name)}</span> <small class="muted">${esc(p.label)}</small></td>${
+          roles.map((r) => `<td class="cell"><span class="dot ${r.permissions.includes(p.name) ? '' : 'off'}" title="${esc(r.label)}"></span></td>`).join('')}</tr>`).join('')}`).join('')}</tbody>`;
+  }
+
   await loadRoles();
+  loadPermMatrix();
   loadMatrix();
 });

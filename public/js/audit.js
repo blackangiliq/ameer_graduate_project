@@ -8,7 +8,14 @@ document.addEventListener('app:ready', ({ detail: me }) => {
     'user.register': 'طلب تسجيل', 'user.approve': 'موافقة على حساب', 'user.update': 'تعديل مستخدم', 'user.status_change': 'تغيير حالة حساب',
     'user.roles.update': 'تعديل أدوار', 'user.password.reset': 'إعادة تعيين كلمة مرور', 'user.unlock': 'فك قفل', 'user.mfa.reset': 'إعادة ضبط MFA',
     'role.create': 'إنشاء دور', 'role.permissions.update': 'تعديل صلاحيات دور', 'role.delete': 'حذف دور', 'session.revoke': 'إنهاء جلسة',
-    'mfa.enable': 'تفعيل MFA', 'mfa.disable': 'إيقاف MFA', 'mfa.setup_started': 'بدء إعداد MFA', 'audit.export': 'تصدير السجل', 'resource.read': 'قراءة مورد',
+    'mfa.enable': 'تفعيل MFA',
+    'leave.request': 'طلب إجازة', 'leave.approve': 'اعتماد إجازة', 'leave.reject': 'رفض إجازة', 'leave.cancel': 'إلغاء إجازة',
+    'hr_record.view': 'الاطلاع على ملف موظف', 'hr_record.update': 'تعديل ملف موظف', 'payroll.view': 'عرض مسيّر رواتب', 'payroll.approve': 'اعتماد الرواتب',
+    'invoice.create': 'تسجيل فاتورة', 'invoice.approve': 'اعتماد فاتورة', 'invoice.reject': 'رفض فاتورة',
+    'expense.submit': 'طلب صرف', 'expense.approve': 'اعتماد مصروف', 'expense.reject': 'رفض مصروف',
+    'customer.create': 'إضافة عميل', 'deal.create': 'إنشاء صفقة', 'deal.update': 'تحديث صفقة',
+    'ticket.create': 'فتح تذكرة', 'ticket.take': 'استلام تذكرة', 'ticket.start': 'بدء معالجة', 'ticket.resolve': 'حل تذكرة', 'ticket.close': 'إغلاق تذكرة', 'ticket.assign': 'إسناد تذكرة',
+    'asset.update': 'تحديث جهاز', 'announcement.create': 'نشر إعلان', 'announcement.delete': 'حذف إعلان', 'mfa.disable': 'إيقاف MFA', 'mfa.setup_started': 'بدء إعداد MFA', 'audit.export': 'تصدير السجل', 'resource.read': 'قراءة مورد',
   };
 
   function detailsText(d) {

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الرئيسية · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="home" data-permission="" data-probe="">
+<main class="main" id="main" hidden>
+  <div class="page-head">
+    <div><div class="crumb">بوابة الموظف</div><h1>مرحباً</h1><p>ما يظهر هنا محسوب من صلاحياتك فقط: المهام التي تنتظرك، خدماتك الذاتية، والإعلانات الموجّهة لك.</p></div>
+    <div class="actions" id="headActions"></div>
+  </div>
+  <div id="perms"></div>
+  <div class="kpis" id="me"></div>
+  <div class="grid g-main">
+    <div class="card"><div class="card-head"><h3>بانتظارك</h3><small class="muted">مهام لا يراها إلا من يملك صلاحية تنفيذها</small></div><div class="card-body" id="tasks"></div></div>
+    <div class="card"><div class="card-head"><h3>الإعلانات</h3><a class="btn btn-ghost btn-sm" href="/announcements">الكل</a></div><div class="card-body" id="ann"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><div class="card-head"><h3>تطبيقات المؤسسة</h3><small class="muted">المقفلة لا تملك صلاحية الوصول إليها</small></div><div class="card-body apps" id="apps"></div></div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/module.js"></script>
+<script src="/js/home.js"></script>
+</body>
+</html>

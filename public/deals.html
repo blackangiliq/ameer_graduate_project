@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>الصفقات · IAM Gateway</title>
+  <link rel="icon" href="/img/logo.svg">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="deals" data-permission="deals:read:own,deals:read:all" data-probe="/api/ops/deals">
+<main class="main" id="main" hidden>
+  <div class="page-head">
+    <div><div class="crumb">المبيعات وخدمة العملاء</div><h1>الصفقات</h1><p>ملكية السجل: المندوب يرى ويعدّل صفقاته فقط، ومدير المبيعات يرى الكل ويعيد إسنادها.</p></div>
+    <div class="actions" id="headActions"></div>
+  </div>
+  <div id="perms"></div>
+  <div class="kpis" id="pipeline"></div>
+  <div class="card"><div class="toolbar"><div id="scope"></div></div><div class="table-wrap" id="table"></div></div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/module.js"></script>
+<script src="/js/deals.js"></script>
+</body>
+</html>

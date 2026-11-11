@@ -5,7 +5,7 @@
   let useRecovery = false;
   const params = new URLSearchParams(location.search);
   const next = params.get('next');
-  const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'; // no open redirect
+  const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/home'; // no open redirect
 
   if (params.has('logged_out')) UI.alert($('#loginAlert'), 'تم تسجيل الخروج وإنهاء الجلسة بنجاح', 'success');
 
@@ -14,12 +14,7 @@
 
   async function goIn(user) {
     if (user?.mustChangePassword) { location.href = '/change-password'; return; }
-    // Employees without the dashboard permission land on their workspace.
-    try {
-      const me = await Api.get('/api/auth/me');
-      location.href = safeNext !== '/dashboard' ? safeNext
-        : me.permissions.includes('dashboard:view') ? '/dashboard' : '/resources';
-    } catch { location.href = '/resources'; }
+    location.href = safeNext;
   }
 
   $('#loginForm').addEventListener('submit', async (e) => {
